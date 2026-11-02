@@ -1,3 +1,7 @@
+> **Downstream native danmaku preview** — based on official v0.19.10, with a
+> separate app identity. See [scope, build instructions and validation checklist](docs/native-danmaku.md).
+> Not an official Jellyfin release.
+
 <h1 align="center">Jellyfin Android TV</h1>
 <h3 align="center">Part of the <a href="https://jellyfin.org">Jellyfin Project</a></h3>
 

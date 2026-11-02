@@ -31,6 +31,7 @@ import org.jellyfin.androidtv.ui.playback.overlay.action.ChannelBarChannelAction
 import org.jellyfin.androidtv.ui.playback.overlay.action.ChapterAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.ClosedCaptionsAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.CustomAction;
+import org.jellyfin.androidtv.ui.playback.overlay.action.DanmakuAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.FastForwardAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.GuideAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.PlayPauseAction;
@@ -63,6 +64,7 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
     private PlaybackSpeedAction playbackSpeedAction;
     private ZoomAction zoomAction;
     private ChapterAction chapterAction;
+    private DanmakuAction danmakuAction;
 
     // TV actions
     private PreviousLiveTvChannelAction previousLiveTvChannelAction;
@@ -111,6 +113,7 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
 
         closedCaptionsAction.removePopup();
         playbackSpeedAction.dismissPopup();
+        danmakuAction.dismissPopup();
         selectAudioAction.dismissPopup();
         selectQualityAction.dismissPopup();
         zoomAction.dismissPopup();
@@ -187,6 +190,8 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
     }
 
     private void initActions(Context context) {
+        danmakuAction = new DanmakuAction(context, this);
+        danmakuAction.setLabels(new String[]{context.getString(R.string.danmaku_title)});
         playPauseAction = new PlayPauseAction(context);
         rewindAction = new RewindAction(context);
         fastForwardAction = new FastForwardAction(context);
@@ -279,6 +284,7 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
 
         if (!playerAdapter.isLiveTv()) {
             secondaryActionsAdapter.add(playbackSpeedAction);
+            secondaryActionsAdapter.add(danmakuAction);
             secondaryActionsAdapter.add(selectQualityAction);
         }
 

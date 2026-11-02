@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preview is localized in English and Simplified Chinese; other locales intentionally use English fallback. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en" tools:ignore="MissingTranslation">
+    <string name="danmaku_title">Danmaku</string>
+    <string name="danmaku_enabled">Enable danmaku</string>
+    <string name="danmaku_font">Font size</string>
+    <string name="danmaku_rows">Maximum rows</string>
+    <string name="danmaku_opacity">Opacity</string>
+    <string name="danmaku_duration">Display duration</string>
+    <string name="danmaku_offset">Time offset (positive: show earlier)</string>
+</resources>

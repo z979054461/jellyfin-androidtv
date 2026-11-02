@@ -1292,6 +1292,19 @@ public class PlaybackController implements PlaybackControllerNotifiable {
         return bufferedPosition;
     }
 
+    /** Non-seekable streams may restart at zero after transcoding; exclude them until mapped. */
+    public boolean isDanmakuSupported() {
+        return !isLiveTv() && hasInitializedVideoManager()
+                && mVideoManager.mExoPlayer.isCurrentMediaItemSeekable();
+    }
+
+    /** Actual media clock for overlays; no wall-clock extrapolation or reporting-loop quantization. */
+    public long getDanmakuPositionMs() {
+        if (!hasInitializedVideoManager()) return getCurrentPosition();
+        if (mSeekPosition != -1 && (!finishedInitialSeek || !isPlaying())) return Math.max(0, mSeekPosition);
+        return Math.max(0, mVideoManager.mExoPlayer.getCurrentPosition());
+    }
+
     public long getCurrentPosition() {
         // don't report the real position if seeking
         return !isPlaying() && mSeekPosition != -1 ? mSeekPosition : mCurrentPosition;

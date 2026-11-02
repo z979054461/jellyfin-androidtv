@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - release-*
+      - feature/native-danmaku
   pull_request:
 
 permissions:

@@ -131,6 +131,8 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
     private final Lazy<org.jellyfin.sdk.api.client.ApiClient> api = inject(org.jellyfin.sdk.api.client.ApiClient.class);
     private final Lazy<MediaManager> mediaManager = inject(MediaManager.class);
     private final Lazy<VideoQueueManager> videoQueueManager = inject(VideoQueueManager.class);
+    private org.jellyfin.androidtv.ui.playback.danmaku.DanmakuSession danmakuSession;
+
     private final Lazy<PlaybackControllerContainer> playbackControllerContainer = inject(PlaybackControllerContainer.class);
     private final Lazy<CustomMessageRepository> customMessageRepository = inject(CustomMessageRepository.class);
     private final Lazy<NavigationRepository> navigationRepository = inject(NavigationRepository.class);
@@ -223,11 +225,19 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
 
         if (playbackController != null) {
             playbackController.init(new VideoManager(requireActivity(), view, helper), this);
+            danmakuSession = new org.jellyfin.androidtv.ui.playback.danmaku.DanmakuSession(
+                    binding.danmakuView, playbackController,
+                    org.koin.java.KoinJavaComponent.get(org.jellyfin.sdk.api.client.ApiClient.class),
+                    androidx.lifecycle.LifecycleOwnerKt.getLifecycleScope(getViewLifecycleOwner()));
         }
     }
 
     @Override
     public void onDestroyView() {
+        if (danmakuSession != null) {
+            danmakuSession.close();
+            danmakuSession = null;
+        }
         super.onDestroyView();
 
         binding = null;
