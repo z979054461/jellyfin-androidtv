@@ -49,9 +49,8 @@ jobs:
           umask 077
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/danmaku-release.p12"
           test -s "$RUNNER_TEMP/danmaku-release.p12"
-          keytool -list -keystore "$RUNNER_TEMP/danmaku-release.p12" -storetype PKCS12 \
-            -storepass:env KEYSTORE_PASSWORD -alias "$SIGNING_KEY_ALIAS" > "$RUNNER_TEMP/danmaku-key-info.txt"
-          grep -F 'PrivateKeyEntry' "$RUNNER_TEMP/danmaku-key-info.txt"
+          java tools/signing/VerifyReleaseKey.java "$RUNNER_TEMP/danmaku-release.p12" \
+            config/danmaku-signing.sha256 "$RUNNER_TEMP/danmaku-key-alias"
           echo 'ready=true' >> "$GITHUB_OUTPUT"
       - name: Build release and run repository checks
         env:
@@ -63,6 +62,8 @@ jobs:
         run: |
           if [ "$SIGNING_READY" != 'true' ]; then
             unset KEYSTORE_FILE KEYSTORE_PASSWORD SIGNING_KEY_ALIAS SIGNING_KEY_PASSWORD
+          else
+            export SIGNING_KEY_ALIAS="$(cat "$RUNNER_TEMP/danmaku-key-alias")"
           fi
           ./gradlew assembleRelease test detekt lint --no-daemon
       - name: Verify signed release identity and prepare checksums
@@ -128,4 +129,4 @@ jobs:
             build/danmaku-release/*
       - name: Remove temporary signing material
         if: always()
-        run: rm -f "$RUNNER_TEMP/danmaku-release.p12"
+        run: rm -f "$RUNNER_TEMP/danmaku-release.p12" "$RUNNER_TEMP/danmaku-key-alias"
