@@ -16,6 +16,7 @@ class OptionsAction(
 	@DrawableRes
 	var icon: Int? = null
 	var content: String? = null
+	var key: String? = null
 	var onActivate: () -> Unit = {}
 
 	fun setTitle(@StringRes resId: Int) {
@@ -29,7 +30,7 @@ class OptionsAction(
 	override fun build(category: PreferenceCategory, container: OptionsUpdateFunContainer) {
 		val pref = Preference(context).also {
 			it.isPersistent = false
-			it.key = UUID.randomUUID().toString()
+			it.key = key ?: UUID.randomUUID().toString()
 			category.addPreference(it)
 			it.isEnabled = dependencyCheckFun() && enabled
 			it.isVisible = visible

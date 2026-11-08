@@ -32,5 +32,6 @@ jobs:
           sh tools/network-tests/run.sh
           sh tools/network-label-tests/run.sh
           sh tools/hold-speed-tests/run.sh
+          sh tools/installer-tests/run.sh
       - name: Run test task
         run: ./gradlew test

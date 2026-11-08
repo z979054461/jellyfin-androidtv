@@ -138,3 +138,12 @@ downstream feature inventory. The player header now exposes actual network
 payload throughput, and seekable on-demand playback supports hold-to-2x with
 restoration, lifecycle cancellation and a 30-second lost-release safeguard.
 Release package identity and signing certificate remain unchanged from release 3.
+
+## Signed release 5
+
+See [release notes](releases/danmaku-release-5.md). The update screen restores
+actionable TV-remote focus after asynchronous screen rebuilds. Verified APKs
+automatically hand off once after the requested foreground download succeeds,
+and retain an explicit retry action, separate from the
+optional app-install permission settings page. OS authorization remains final;
+security denial never triggers an alternate install attempt.

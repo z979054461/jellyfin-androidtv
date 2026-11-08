@@ -55,7 +55,7 @@ abstract class OptionsFragment : LeanbackPreferenceFragmentCompat() {
 		preferenceScreen = screen.build(preferenceManager)
 	}
 
-	protected fun rebuild() {
+	protected open fun rebuild() {
 		screen.build(preferenceManager, preferenceScreen)
 	}
 
