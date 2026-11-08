@@ -1,0 +1,60 @@
+name: Danmaku / Preview release
+
+on:
+  push:
+    branches:
+      - feature/native-danmaku
+
+permissions:
+  contents: read
+
+concurrency:
+  group: danmaku-preview
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    if: github.repository == 'z979054461/jellyfin-androidtv'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Setup Java
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+      - name: Test danmaku parser and timeline
+        run: tools/danmaku-tests/run.sh
+      - name: Build and run repository checks
+        run: ./gradlew assembleDebug test detekt lint --no-daemon
+      - name: Prepare APK and checksums
+        run: |
+          mkdir -p build/danmaku-preview
+          cp app/build/outputs/apk/debug/*.apk build/danmaku-preview/
+          cd build/danmaku-preview
+          sha256sum *.apk > SHA256SUMS.txt
+      - name: Preserve tested artifacts
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: danmaku-preview-2
+          path: build/danmaku-preview/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publish requested preview without replacing existing releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view v0.19.10-danmaku.2 >/dev/null 2>&1; then
+            echo 'Preview 2 already exists; preserving its tag and assets.'
+            exit 0
+          fi
+          gh release create v0.19.10-danmaku.2 \
+            --target "$GITHUB_SHA" --prerelease \
+            --title 'Jellyfin TV 弹幕预览版 2' \
+            --notes-file docs/releases/danmaku-preview-2.md \
+            build/danmaku-preview/*

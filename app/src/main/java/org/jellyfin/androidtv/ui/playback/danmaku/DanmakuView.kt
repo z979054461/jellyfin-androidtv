@@ -27,6 +27,11 @@ class DanmakuView @JvmOverloads constructor(context: Context, attrs: AttributeSe
 			rebuild()
 		}
 	var opacity = DanmakuSettings.DEFAULT_OPACITY
+		set(value) {
+			if (field == value) return
+			field = value
+			invalidate()
+		}
 	var durationMs = DanmakuSettings.DEFAULT_DURATION_MS
 		set(value) {
 			if (field == value) return

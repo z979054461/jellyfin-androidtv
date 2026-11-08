@@ -2,6 +2,7 @@ package org.jellyfin.androidtv.ui.playback.danmaku
 
 /** Named, bounded user-selectable presets shared by the menu and renderer. */
 object DanmakuSettings {
+	const val DEFAULT_ENABLED = true
 	const val DEFAULT_FONT = 1f
 	const val DEFAULT_ROWS = 6
 	const val DEFAULT_OPACITY = 0.8f

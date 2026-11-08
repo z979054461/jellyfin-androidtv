@@ -232,6 +232,11 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
         }
     }
 
+    @Nullable
+    public org.jellyfin.androidtv.ui.playback.danmaku.DanmakuSession getDanmakuSession() {
+        return danmakuSession;
+    }
+
     @Override
     public void onDestroyView() {
         if (danmakuSession != null) {

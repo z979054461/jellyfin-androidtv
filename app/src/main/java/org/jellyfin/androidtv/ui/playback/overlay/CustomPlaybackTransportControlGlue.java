@@ -261,6 +261,11 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
             primaryActionsAdapter.add(guideAction);
         }
 
+        // Keep danmaku discoverable next to subtitles in the main controls.
+        if (!playerAdapter.isLiveTv()) {
+            primaryActionsAdapter.add(danmakuAction);
+        }
+
         // Secondary Items
         if (playerAdapter.isLiveTv()) {
             secondaryActionsAdapter.add(previousLiveTvChannelAction);
@@ -284,7 +289,6 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
 
         if (!playerAdapter.isLiveTv()) {
             secondaryActionsAdapter.add(playbackSpeedAction);
-            secondaryActionsAdapter.add(danmakuAction);
             secondaryActionsAdapter.add(selectQualityAction);
         }
 

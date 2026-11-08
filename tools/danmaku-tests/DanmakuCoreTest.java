@@ -18,6 +18,11 @@ public class DanmakuCoreTest {
         catch (IOException expected) { checks++; }
     }
     public static void main(String[] args) throws Exception {
+        check(DanmakuLoadState.fromHttpStatus(401) == DanmakuLoadState.UNAUTHORIZED);
+        check(DanmakuLoadState.fromHttpStatus(403) == DanmakuLoadState.UNAUTHORIZED);
+        check(DanmakuLoadState.fromHttpStatus(404) == DanmakuLoadState.NOT_FOUND);
+        check(DanmakuLoadState.fromHttpStatus(500) == DanmakuLoadState.HTTP_ERROR);
+        check(DanmakuLoadState.fromHttpStatus(302) == DanmakuLoadState.HTTP_ERROR);
         List<DanmakuComment> parsed = parse("<i><d p='2,1,25,16777215'>hello &amp; world</d><d p='1,5,25,0'>顶</d><d p='NaN,1,25,0'>bad</d><d p='1,7,25,0'>unsupported</d><d p='1,4,25,99999999'>bad color</d></i>");
         check(parsed.size() == 2);
         check(parsed.get(0).timeMs == 1000 && parsed.get(0).mode == 5);

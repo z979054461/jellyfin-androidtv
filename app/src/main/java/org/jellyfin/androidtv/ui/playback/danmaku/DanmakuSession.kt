@@ -22,6 +22,7 @@ import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
+import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.ui.playback.PlaybackController
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.api.client.HttpClientOptions
@@ -51,6 +52,38 @@ class DanmakuSession(
 	private var generation = 0
 	private var closed = false
 	private var enabled = false
+	private var state = DanmakuLoadState.OFF
+	private var commentCount = 0
+	var statusListener: (() -> Unit)? = null
+	val statusText: String
+		get() = view.context.getString(when (state) {
+			DanmakuLoadState.OFF -> R.string.danmaku_status_off
+			DanmakuLoadState.WAITING -> R.string.danmaku_status_waiting
+			DanmakuLoadState.UNSUPPORTED -> R.string.danmaku_status_unsupported
+			DanmakuLoadState.LOADING -> R.string.danmaku_status_loading
+			DanmakuLoadState.READY -> R.string.danmaku_status_ready
+			DanmakuLoadState.EMPTY -> R.string.danmaku_status_empty
+			DanmakuLoadState.NOT_FOUND -> R.string.danmaku_status_not_found
+			DanmakuLoadState.UNAUTHORIZED -> R.string.danmaku_status_unauthorized
+			DanmakuLoadState.INVALID_DATA -> R.string.danmaku_status_invalid
+			DanmakuLoadState.NETWORK_ERROR -> R.string.danmaku_status_network
+			DanmakuLoadState.HTTP_ERROR -> R.string.danmaku_status_http
+		}, commentCount)
+
+	private fun updateStatus(value: DanmakuLoadState) {
+		state = value
+		statusListener?.invoke()
+	}
+
+	private fun idleStatus() = when {
+		!enabled -> DanmakuLoadState.OFF
+		controller.currentlyPlayingItem == null -> DanmakuLoadState.WAITING
+		else -> DanmakuLoadState.UNSUPPORTED
+	}
+
+	fun retry() {
+		if (!closed) load()
+	}
 	private val preferenceListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> applySettings() }
 	private val frame = object : Runnable {
 		override fun run() {
@@ -59,6 +92,8 @@ class DanmakuSession(
 			if (id != itemId) {
 				itemId = id
 				load()
+			} else if (id == null && state != idleStatus()) {
+				updateStatus(idleStatus())
 			}
 			if (enabled) view.positionMs = controller.danmakuPositionMs + preferences.getInt("offset", 0)
 			handler.postDelayed(this, if (enabled && view.hasComments() && controller.isPlaying) FRAME_DELAY_MS else IDLE_DELAY_MS)
@@ -73,7 +108,7 @@ class DanmakuSession(
 
 	private fun applySettings() {
 		val previouslyEnabled = enabled
-		enabled = preferences.getBoolean("enabled", false)
+		enabled = preferences.getBoolean("enabled", DanmakuSettings.DEFAULT_ENABLED)
 		view.visibility = if (enabled) View.VISIBLE else View.GONE
 		view.fontScale = preferences.getFloat("font", DanmakuSettings.DEFAULT_FONT)
 			.coerceIn(DanmakuSettings.fonts.first(), DanmakuSettings.fonts.last())
@@ -90,16 +125,34 @@ class DanmakuSession(
 		loading?.cancel()
 		val requestGeneration = ++generation
 		view.setComments(emptyList())
-		val id = itemId ?: return
-		if (!enabled) return
+		commentCount = 0
+		val id = itemId
+		if (!enabled || id == null) {
+			updateStatus(idleStatus())
+			return
+		}
+		updateStatus(DanmakuLoadState.LOADING)
 		loading = scope.launch {
 			try {
 				val bytes = fetch(id)
-				val comments = withContext(Dispatchers.Default) { DanmakuParser.parse(bytes) }
-				if (!closed && generation == requestGeneration && itemId == id) view.setComments(comments)
+				val comments = withContext(Dispatchers.Default) {
+					try {
+						DanmakuParser.parse(bytes)
+					} catch (_: IOException) {
+						throw LoadException(DanmakuLoadState.INVALID_DATA)
+					}
+				}
+				if (!closed && generation == requestGeneration && itemId == id) {
+					view.setComments(comments)
+					commentCount = comments.size
+					updateStatus(if (comments.isEmpty()) DanmakuLoadState.EMPTY else DanmakuLoadState.READY)
+				}
 			} catch (cancelled: CancellationException) {
 				throw cancelled
-			} catch (_: Exception) {
+			} catch (error: Exception) {
+				if (!closed && generation == requestGeneration && itemId == id) {
+					updateStatus((error as? LoadException)?.state ?: DanmakuLoadState.NETWORK_ERROR)
+				}
 				// Do not log authenticated URLs, XML, or comment text.
 				Timber.i("Danmaku unavailable; continuing normal video playback")
 			}
@@ -125,9 +178,9 @@ class DanmakuSession(
 			override fun onResponse(call: Call, response: Response) {
 				try {
 					val bytes = response.use {
-						if (!it.isSuccessful) throw IOException("Danmaku HTTP failure")
-						val body = it.body ?: throw IOException("Empty danmaku response")
-						if (body.contentLength() > DanmakuParser.MAX_BYTES) throw IOException("Danmaku too large")
+						if (!it.isSuccessful) throw LoadException(DanmakuLoadState.fromHttpStatus(it.code))
+						val body = it.body ?: throw LoadException(DanmakuLoadState.INVALID_DATA)
+						if (body.contentLength() > DanmakuParser.MAX_BYTES) throw LoadException(DanmakuLoadState.INVALID_DATA)
 						body.byteStream().use { input ->
 							val output = ByteArrayOutputStream()
 							val buffer = ByteArray(READ_BUFFER_BYTES)
@@ -135,7 +188,7 @@ class DanmakuSession(
 								if (!continuation.isActive) throw IOException("Cancelled")
 								val count = input.read(buffer)
 								if (count < 0) break
-								if (output.size() + count > DanmakuParser.MAX_BYTES) throw IOException("Danmaku too large")
+								if (output.size() + count > DanmakuParser.MAX_BYTES) throw LoadException(DanmakuLoadState.INVALID_DATA)
 								output.write(buffer, 0, count)
 							}
 							output.toByteArray()
@@ -151,12 +204,15 @@ class DanmakuSession(
 
 	fun close() {
 		closed = true
+		statusListener = null
 		generation++
 		loading?.cancel()
 		handler.removeCallbacks(frame)
 		preferences.unregisterOnSharedPreferenceChangeListener(preferenceListener)
 		view.setComments(emptyList())
 	}
+
+	private class LoadException(val state: DanmakuLoadState) : IOException("Danmaku unavailable")
 
 	companion object {
 		const val PREFERENCES = "native_danmaku"

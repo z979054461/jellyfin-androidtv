@@ -8,4 +8,18 @@
     <string name="danmaku_opacity">Opacity</string>
     <string name="danmaku_duration">Display duration</string>
     <string name="danmaku_offset">Time offset (positive: show earlier)</string>
+    <string name="danmaku_status_off">Danmaku is off</string>
+    <string name="danmaku_status_waiting">Waiting for playback</string>
+    <string name="danmaku_status_unsupported">This stream does not support danmaku</string>
+    <string name="danmaku_status_loading">Loading danmaku…</string>
+    <string name="danmaku_status_ready">Loaded %1$d comments</string>
+    <string name="danmaku_status_empty">No supported comments in this file</string>
+    <string name="danmaku_status_not_found">No comment file or plugin route (404)</string>
+    <string name="danmaku_status_unauthorized">Server denied access (401/403)</string>
+    <string name="danmaku_status_invalid">Unsupported or oversized comment data</string>
+    <string name="danmaku_status_network">Could not load comments; check the connection and retry</string>
+    <string name="danmaku_status_http">Server request failed; check the plugin and retry</string>
+    <string name="danmaku_retry">Reload danmaku</string>
+    <string name="danmaku_help">Where do comments come from?</string>
+    <string name="danmaku_help_text">Requires jellyfin-plugin-danmu on your Jellyfin server and a matching XML file for this item. The TV app does not install plugins or search third-party sites.</string>
 </resources>

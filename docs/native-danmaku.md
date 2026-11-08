@@ -14,14 +14,13 @@ Jellyfin release and does not modify the upstream master branch.
   subtitle-safe lower 30%, outline, font size, row limit, opacity, duration and offset.
 - Media-position-based frames: no wall-clock extrapolation. Pause/buffering,
   backward/forward seek and playback speed follow the internal player's timeline.
-- Playback action in the secondary controls, navigable with the remote.
-  Danmaku is **off by default**. Positive offset displays comments earlier.
+- Playback action in the primary controls, navigable with the remote.
+  Danmaku is **on when no preference has been saved**; an explicit off preference is preserved. Positive offset displays comments earlier.
 - Separate application ID `io.github.z979054461.jellyfin.danmaku` (debug suffix
   `.debug`), so it does not replace official Jellyfin or fengymi's client.
 
 No server plugins are installed automatically. A missing plugin, HTTP error,
-unsupported XML or empty data leaves normal video playback unchanged. Disabling
-and re-enabling the option retries a failed load.
+unsupported XML or empty data leaves normal video playback unchanged. The menu shows load status and comment counts, and provides an explicit reload action.
 
 ## Deliberate first-version limits
 
@@ -79,7 +78,7 @@ compatibility.
 - No physical TV/emulator or live server-plugin integration has been tested.
 
 Before treating an APK as production-ready, test on a spare TV/emulator:
-1. Default-off state; enabling on a server without the plugin.
+1. Default-on state, preserved explicit off preference, and missing-plugin status.
 2. Correct comments with a real plugin and Jellyfin base-path reverse proxy.
 3. Pause, buffering, resume, seek in both directions, 0.5x/1x/2x.
 4. Seekable HLS transcoding and resumed playback; non-seekable streams stay empty.
@@ -99,3 +98,9 @@ additional GPLv2/Apache2 compatibility question and JitPack/NDK dependency.
 
 This preview does not imply that existing upstream dependencies have undergone
 a fresh comprehensive license audit.
+
+## Preview 2
+
+See [release notes](releases/danmaku-preview-2.md) for changes, installation and signing caveats.
+The previous preview already contained a renderer; preview 2 improves discovery and diagnostics.
+The CI release workflow runs build/test/lint/detekt before publishing a debug prerelease.

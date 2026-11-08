@@ -7,4 +7,18 @@
     <string name="danmaku_opacity">不透明度</string>
     <string name="danmaku_duration">显示时长</string>
     <string name="danmaku_offset">时间偏移（正值提前显示）</string>
+    <string name="danmaku_status_off">弹幕已关闭</string>
+    <string name="danmaku_status_waiting">等待视频开始播放</string>
+    <string name="danmaku_status_unsupported">当前播放流暂不支持弹幕</string>
+    <string name="danmaku_status_loading">正在加载弹幕…</string>
+    <string name="danmaku_status_ready">已加载 %1$d 条弹幕</string>
+    <string name="danmaku_status_empty">文件中没有支持的弹幕</string>
+    <string name="danmaku_status_not_found">本片没有弹幕，或插件接口不可用（404）</string>
+    <string name="danmaku_status_unauthorized">服务端拒绝访问（401/403）</string>
+    <string name="danmaku_status_invalid">弹幕数据格式不支持或文件过大</string>
+    <string name="danmaku_status_network">加载失败，请检查网络并重试</string>
+    <string name="danmaku_status_http">服务端请求失败，请检查弹幕插件并重试</string>
+    <string name="danmaku_retry">重新加载弹幕</string>
+    <string name="danmaku_help">弹幕从哪里来？</string>
+    <string name="danmaku_help_text">需要 Jellyfin 服务端已安装 jellyfin-plugin-danmu，并为本片下载匹配的 XML 弹幕。电视端不会安装插件，也不会向第三方网站搜索弹幕。</string>
 </resources>

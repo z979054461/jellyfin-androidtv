@@ -53,7 +53,7 @@ android {
 
 	buildTypes {
 		release {
-			versionNameSuffix = "-danmaku-preview"
+			versionNameSuffix = "-preview"
 			isMinifyEnabled = false
 
 			// Set package names used in various XML files
@@ -70,7 +70,7 @@ android {
 		}
 
 		debug {
-			versionNameSuffix = "-danmaku-preview"
+			versionNameSuffix = "-preview"
 			// Use different application id to run release and debug at the same time
 			applicationIdSuffix = ".debug"
 
