@@ -3,7 +3,7 @@ name: Danmaku / Signed release
 on:
   push:
     branches:
-      - feature/native-danmaku
+      - master
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   release:
-    if: github.repository == 'z979054461/jellyfin-androidtv'
+    if: github.repository == 'z979054461/jellyfin-androidtv' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -113,13 +113,27 @@ jobs:
           path: build/danmaku-release/
           if-no-files-found: error
           retention-days: 30
-      - name: Publish requested release without replacing existing releases
+      - name: Publish stable release without replacing tags or assets
         if: steps.signing.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if gh release view v0.19.10-danmaku.5 >/dev/null 2>&1; then
-            echo 'Release 5 already exists; preserving its tag and assets.'
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v0.19.10-danmaku.5" > "$RUNNER_TEMP/danmaku-existing-tag.json"
+            test "$(jq -r '.object.type' "$RUNNER_TEMP/danmaku-existing-tag.json")" = 'commit'
+            test "$(jq -r '.object.sha' "$RUNNER_TEMP/danmaku-existing-tag.json")" = '701ceac0135c8ed09a39a1651db8341dd022aab7'
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/v0.19.10-danmaku.5" > "$RUNNER_TEMP/danmaku-existing-release.json"
+            jq -e '
+              .draft == false and
+              ([.assets[] | select(.name == "jellyfin-danmaku-191005.apk" and .state == "uploaded" and
+                .digest == "sha256:197b06488ef564a1fc8374e3e00dc3e5f64de2dd86c62b6fcd7a7164ed23238f")] | length) == 1 and
+              ([.assets[] | select(.name == "SHA256SUMS.txt" and .state == "uploaded")] | length) == 1
+            ' "$RUNNER_TEMP/danmaku-existing-release.json"
+            gh release edit v0.19.10-danmaku.5 \
+              --prerelease=false --latest \
+              --title 'Jellyfin TV 定制版 5' \
+              --notes-file docs/releases/danmaku-release-5.md
+            echo 'Release 5 is stable; its existing tag and assets are preserved.'
             exit 0
           fi
           if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v0.19.10-danmaku.5" > "$RUNNER_TEMP/danmaku-tag.json" 2>/dev/null; then
@@ -127,8 +141,8 @@ jobs:
             test "$(jq -r '.object.sha' "$RUNNER_TEMP/danmaku-tag.json")" = "$GITHUB_SHA"
           fi
           gh release create v0.19.10-danmaku.5 \
-            --target "$GITHUB_SHA" --prerelease \
-            --title 'Jellyfin TV 定制版 5（正式签名）' \
+            --target "$GITHUB_SHA" --latest \
+            --title 'Jellyfin TV 定制版 5' \
             --notes-file docs/releases/danmaku-release-5.md \
             build/danmaku-release/*
       - name: Remove temporary signing material

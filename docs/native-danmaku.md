@@ -1,8 +1,9 @@
-# Native danmaku preview
+# Native danmaku
 
 This downstream feature is based on official Jellyfin Android TV **v0.19.10**,
 commit `984181a3d6ab14e9a6d2dcc850c582e1c138bd95`. It is not an official
-Jellyfin release and does not modify the upstream master branch.
+Jellyfin release. This fork maintains its custom stable code on `master`;
+it does not modify the official upstream repository.
 
 ## Scope
 
@@ -133,8 +134,8 @@ CI validates its Java alias before building, and never includes it in artifacts.
 
 ## Signed release 4
 
-See [release notes](releases/danmaku-release-4.md) and the README for the complete
-downstream feature inventory. The player header now exposes actual network
+See [release notes](releases/danmaku-release-4.md) and the [custom changes](custom-changes.md)
+for the complete downstream feature inventory. The player header now exposes actual network
 payload throughput, and seekable on-demand playback supports hold-to-2x with
 restoration, lifecycle cancellation and a 30-second lost-release safeguard.
 Release package identity and signing certificate remain unchanged from release 3.
