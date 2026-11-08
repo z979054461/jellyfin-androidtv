@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 class DanmakuSettingsTests : FunSpec({
 	test("smaller default remains one of the selectable sizes") {
 		DanmakuSettings.DEFAULT_FONT shouldBe 0.8f
-		DanmakuSettings.fonts.contains(DanmakuSettings.DEFAULT_FONT) shouldBe true
+		DanmakuSettings.fonts.any { it == DanmakuSettings.DEFAULT_FONT } shouldBe true
 		DanmakuSettings.fontPercentages shouldBe (50..150 step 10).toList()
 	}
 
@@ -27,7 +27,7 @@ class DanmakuSettingsTests : FunSpec({
 	}
 
 	test("previous user font and row preferences remain supported") {
-		listOf(0.8f, 1f, 1.2f).all { it in DanmakuSettings.fonts } shouldBe true
+		listOf(0.8f, 1f, 1.2f).all { saved -> DanmakuSettings.fonts.any { it == saved } } shouldBe true
 		listOf(3, 6, 9).all { it in DanmakuSettings.rows } shouldBe true
 	}
 })
