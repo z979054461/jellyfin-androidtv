@@ -3,16 +3,20 @@ package org.jellyfin.androidtv.ui.playback.danmaku
 /** Named, bounded user-selectable presets shared by the menu and renderer. */
 object DanmakuSettings {
 	const val DEFAULT_ENABLED = true
-	const val DEFAULT_FONT = 1f
+	const val DEFAULT_FONT = 0.8f
 	const val DEFAULT_ROWS = 6
 	const val DEFAULT_OPACITY = 0.8f
 	const val DEFAULT_DURATION_MS = 8000L
 
+	// Room for every selectable row/font option, without cross-group ID collisions.
+	const val MENU_GROUP_STRIDE = 100
+
 	// Numeric values are the visible menu presets, not hidden calculations.
 	@Suppress("MagicNumber")
-	val fonts = floatArrayOf(0.8f, 1f, 1.2f)
+	val fontPercentages = (50..150 step 10).toList()
+	val fonts = fontPercentages.map { it / 100f }.toFloatArray()
 	@Suppress("MagicNumber")
-	val rows = intArrayOf(3, 6, 9)
+	val rows = (1..20).toList().toIntArray()
 	@Suppress("MagicNumber")
 	val opacity = floatArrayOf(0.5f, 0.8f, 1f)
 	@Suppress("MagicNumber")

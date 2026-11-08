@@ -61,10 +61,10 @@ class DanmakuAction(context: Context, glue: CustomPlaybackTransportControlGlue) 
 				submenu.setGroupCheckable(group, true, true)
 			}
 			options(
-				R.string.danmaku_font, GROUP_FONT, listOf("80%", "100%", "120%"),
-				fonts.indexOfFirst { it == settings.getFloat("font", 1f) }
+				R.string.danmaku_font, GROUP_FONT, DanmakuSettings.fontPercentages.map { "$it%" },
+				fonts.indexOfFirst { it == settings.getFloat("font", DanmakuSettings.DEFAULT_FONT) }
 			)
-			options(R.string.danmaku_rows, GROUP_ROWS, listOf("3", "6", "9"), rows.indexOf(settings.getInt("rows", DanmakuSettings.DEFAULT_ROWS)))
+			options(R.string.danmaku_rows, GROUP_ROWS, rows.map { it.toString() }, rows.indexOf(settings.getInt("rows", DanmakuSettings.DEFAULT_ROWS)))
 			options(
 				R.string.danmaku_opacity, GROUP_OPACITY, listOf("50%", "80%", "100%"),
 				opacity.indexOfFirst { it == settings.getFloat("opacity", DanmakuSettings.DEFAULT_OPACITY) }
@@ -134,6 +134,6 @@ class DanmakuAction(context: Context, glue: CustomPlaybackTransportControlGlue) 
 		private const val GROUP_OFFSET = 5
 		private const val GROUP_RETRY = 6
 		private const val GROUP_HELP = 7
-		private const val GROUP_ID_STRIDE = 10
+		private const val GROUP_ID_STRIDE = DanmakuSettings.MENU_GROUP_STRIDE
 	}
 }

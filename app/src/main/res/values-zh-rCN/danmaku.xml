@@ -3,7 +3,7 @@
     <string name="danmaku_title">弹幕</string>
     <string name="danmaku_enabled">启用弹幕</string>
     <string name="danmaku_font">字号</string>
-    <string name="danmaku_rows">最多行数</string>
+    <string name="danmaku_rows">行数上限（受字号和屏幕空间限制）</string>
     <string name="danmaku_opacity">不透明度</string>
     <string name="danmaku_duration">显示时长</string>
     <string name="danmaku_offset">时间偏移（正值提前显示）</string>

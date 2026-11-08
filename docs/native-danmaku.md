@@ -103,4 +103,25 @@ a fresh comprehensive license audit.
 
 See [release notes](releases/danmaku-preview-2.md) for changes, installation and signing caveats.
 The previous preview already contained a renderer; preview 2 improves discovery and diagnostics.
-The CI release workflow runs build/test/lint/detekt before publishing a debug prerelease.
+The preview 2 CI release workflow ran build/test/lint/detekt before publishing its debug prerelease.
+
+
+## Signed release 3
+
+See [release notes](releases/danmaku-release-3.md). New installs default to 80% font;
+font presets span 50–150% in 10% steps and row limits span every integer 1–20.
+The renderer still limits rows to the available subtitle-safe area. Existing
+saved choices are not overwritten.
+
+Playback information is a local, read-only snapshot of source metadata and
+current player input formats. It does not send server requests or reveal media
+URLs. The dialog refreshes only while visible and closes on episode changes.
+
+The signed release package is separate from the debug preview. The About update
+screen accepts only newer APKs from this fork with a GitHub SHA-256 digest,
+matching package and matching signer. Installation is always the Android system
+installer after an explicit user action. No background or silent updates occur.
+
+CI checks still run when the four dedicated signing Secrets are unavailable,
+but the workflow then skips publishing. Signing keys must never be committed or
+included in build artifacts. A fixed key is required for all later upgrades.

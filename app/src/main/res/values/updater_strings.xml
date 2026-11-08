@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_title">App updates</string>
+    <string name="update_current">Installed version</string>
+    <string name="update_status">Update status</string>
+    <string name="update_check">Check for updates</string>
+    <string name="update_intro">Check this personal fork on GitHub, including preview releases. Nothing is downloaded or installed automatically.</string>
+    <string name="update_debug_unsupported">This preview/debug package cannot upgrade to the release package. Install the signed release APK once separately, then use this button for future updates.</string>
+    <string name="update_download">Download verified update</string>
+    <string name="update_candidate">Version code %1$s · %2$s. Download from z979054461/jellyfin-androidtv on GitHub.</string>
+    <string name="update_install">Open Android installer</string>
+    <string name="update_allow_install">Open installation permission settings</string>
+    <string name="update_install_explanation">Android may require permission to install from this app. You control that permission and must confirm installation in the system installer.</string>
+    <string name="update_cancel">Cancel</string>
+    <string name="update_cancelled">Canceled. You can check or download again.</string>
+    <string name="update_checking">Checking GitHub…</string>
+    <string name="update_none">No newer compatible release APK was found in the latest 20 releases.</string>
+    <string name="update_available">An update is available. Choose Download to continue.</string>
+    <string name="update_downloading">Downloading and verifying the APK. Back or Cancel stops the download.</string>
+    <string name="update_ready">Download verified: SHA-256, package, newer version and signing certificate match. Choose the installation action to continue.</string>
+    <string name="update_failed">Could not safely complete the update. Check your connection or try again later. A missing GitHub checksum, invalid APK or different signing certificate will block installation.</string>
+    <string name="update_settings_unavailable">Installation settings are unavailable on this device. No permission was changed.</string>
+    <string name="update_verifying">Rechecking the APK before opening Android…</string>
+    <string name="update_installer_opened">Android installer opened. Installation still requires your confirmation; returning here does not mean it succeeded.</string>
+</resources>

@@ -53,7 +53,8 @@ android {
 
 	buildTypes {
 		release {
-			versionNameSuffix = "-preview"
+			// Real release variant: independent package, fixed signing, not debuggable.
+			isDebuggable = false
 			isMinifyEnabled = false
 
 			// Set package names used in various XML files

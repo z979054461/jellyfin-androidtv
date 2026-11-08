@@ -202,6 +202,22 @@ public class PlaybackController implements PlaybackControllerNotifiable {
         return mCurrentStreamInfo;
     }
 
+    /** Only the current player formats; never exposes media URLs or credentials. */
+    @Nullable
+    public androidx.media3.common.Format getPlaybackInfoVideoFormat() {
+        return hasInitializedVideoManager() ? mVideoManager.mExoPlayer.getVideoFormat() : null;
+    }
+
+    @Nullable
+    public androidx.media3.common.Format getPlaybackInfoAudioFormat() {
+        return hasInitializedVideoManager() ? mVideoManager.mExoPlayer.getAudioFormat() : null;
+    }
+
+    public int getPlaybackInfoAudioStreamIndex() {
+        return mCurrentOptions != null && mCurrentOptions.getAudioStreamIndex() != null
+                ? mCurrentOptions.getAudioStreamIndex() : mDefaultAudioIndex;
+    }
+
     public boolean canSeek() {
         return !isLiveTv;
     }

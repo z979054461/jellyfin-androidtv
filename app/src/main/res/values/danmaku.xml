@@ -4,7 +4,7 @@
     <string name="danmaku_title">Danmaku</string>
     <string name="danmaku_enabled">Enable danmaku</string>
     <string name="danmaku_font">Font size</string>
-    <string name="danmaku_rows">Maximum rows</string>
+    <string name="danmaku_rows">Maximum rows (limited by font and screen space)</string>
     <string name="danmaku_opacity">Opacity</string>
     <string name="danmaku_duration">Display duration</string>
     <string name="danmaku_offset">Time offset (positive: show earlier)</string>

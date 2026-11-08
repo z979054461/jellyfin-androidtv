@@ -1,19 +1,20 @@
-name: Danmaku / Preview release
+name: Danmaku / Signed release
 
 on:
   push:
     branches:
       - feature/native-danmaku
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: danmaku-preview
+  group: danmaku-release
   cancel-in-progress: false
 
 jobs:
-  preview:
+  release:
     if: github.repository == 'z979054461/jellyfin-androidtv'
     runs-on: ubuntu-24.04
     permissions:
@@ -28,33 +29,100 @@ jobs:
           java-version: 21
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
-      - name: Test danmaku parser and timeline
-        run: tools/danmaku-tests/run.sh
-      - name: Build and run repository checks
-        run: ./gradlew assembleDebug test detekt lint --no-daemon
-      - name: Prepare APK and checksums
+      - name: Test parser, timeline and playback metadata formatting
         run: |
-          mkdir -p build/danmaku-preview
-          cp app/build/outputs/apk/debug/*.apk build/danmaku-preview/
-          cd build/danmaku-preview
+          tools/danmaku-tests/run.sh
+          bash tools/update-tests/run.sh
+      - name: Prepare fixed release signing
+        id: signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.DANMAKU_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.DANMAKU_KEYSTORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.DANMAKU_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.DANMAKU_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$SIGNING_KEY_ALIAS" ] || [ -z "$SIGNING_KEY_PASSWORD" ]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'Release signing is not configured. Checks will run, but no APK will be published.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/danmaku-release.jks"
+          test -s "$RUNNER_TEMP/danmaku-release.jks"
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+      - name: Build release and run repository checks
+        env:
+          SIGNING_READY: ${{ steps.signing.outputs.ready }}
+          KEYSTORE_FILE: ${{ runner.temp }}/danmaku-release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.DANMAKU_KEYSTORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.DANMAKU_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.DANMAKU_KEY_PASSWORD }}
+        run: |
+          if [ "$SIGNING_READY" != 'true' ]; then
+            unset KEYSTORE_FILE KEYSTORE_PASSWORD SIGNING_KEY_ALIAS SIGNING_KEY_PASSWORD
+          fi
+          ./gradlew assembleRelease test detekt lint --no-daemon
+      - name: Verify signed release identity and prepare checksums
+        if: steps.signing.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          TOOLS="$ANDROID_HOME/build-tools/36.0.0"
+          APK=$(python3 - <<'PYCODE'
+          import json, pathlib
+          root = pathlib.Path('app/build/outputs/apk/release')
+          metadata = json.loads((root / 'output-metadata.json').read_text())
+          assert metadata['applicationId'] == 'io.github.z979054461.jellyfin.danmaku'
+          assert len(metadata['elements']) == 1
+          element = metadata['elements'][0]
+          assert element['versionCode'] == 191003
+          assert element['versionName'] == '0.19.10-danmaku.3'
+          path = root / element['outputFile']
+          assert path.is_file() and 0 < path.stat().st_size < 200 * 1024 * 1024
+          print(path)
+          PYCODE
+          )
+          "$TOOLS/apksigner" verify --verbose --print-certs "$APK" > "$RUNNER_TEMP/danmaku-signature.txt"
+          cat "$RUNNER_TEMP/danmaku-signature.txt"
+          EXPECTED=$(tr -d '[:space:]' < config/danmaku-signing.sha256)
+          ACTUAL=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/danmaku-signature.txt")
+          test "$EXPECTED" = "$ACTUAL"
+          "$TOOLS/aapt" dump badging "$APK" > "$RUNNER_TEMP/danmaku-badging.txt"
+          grep -F "package: name='io.github.z979054461.jellyfin.danmaku' versionCode='191003' versionName='0.19.10-danmaku.3'" "$RUNNER_TEMP/danmaku-badging.txt"
+          "$TOOLS/aapt" dump xmltree "$APK" AndroidManifest.xml > "$RUNNER_TEMP/danmaku-manifest.txt"
+          if grep -Eq 'android:debuggable.*0xffffffff' "$RUNNER_TEMP/danmaku-manifest.txt"; then
+            echo 'Refusing to publish a debuggable APK.' >&2
+            exit 1
+          fi
+          mkdir -p build/danmaku-release
+          cp "$APK" build/danmaku-release/jellyfin-danmaku-191003.apk
+          cd build/danmaku-release
           sha256sum *.apk > SHA256SUMS.txt
-      - name: Preserve tested artifacts
+      - name: Preserve signed and tested artifacts
+        if: steps.signing.outputs.ready == 'true'
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: danmaku-preview-2
-          path: build/danmaku-preview/
+          name: danmaku-release-3
+          path: build/danmaku-release/
           if-no-files-found: error
           retention-days: 30
-      - name: Publish requested preview without replacing existing releases
+      - name: Publish requested release without replacing existing releases
+        if: steps.signing.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if gh release view v0.19.10-danmaku.2 >/dev/null 2>&1; then
-            echo 'Preview 2 already exists; preserving its tag and assets.'
+          if gh release view v0.19.10-danmaku.3 >/dev/null 2>&1; then
+            echo 'Release 3 already exists; preserving its tag and assets.'
             exit 0
           fi
-          gh release create v0.19.10-danmaku.2 \
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v0.19.10-danmaku.3" > "$RUNNER_TEMP/danmaku-tag.json" 2>/dev/null; then
+            test "$(jq -r '.object.type' "$RUNNER_TEMP/danmaku-tag.json")" = 'commit'
+            test "$(jq -r '.object.sha' "$RUNNER_TEMP/danmaku-tag.json")" = "$GITHUB_SHA"
+          fi
+          gh release create v0.19.10-danmaku.3 \
             --target "$GITHUB_SHA" --prerelease \
-            --title 'Jellyfin TV 弹幕预览版 2' \
-            --notes-file docs/releases/danmaku-preview-2.md \
-            build/danmaku-preview/*
+            --title 'Jellyfin TV 定制版 3（正式签名）' \
+            --notes-file docs/releases/danmaku-release-3.md \
+            build/danmaku-release/*
+      - name: Remove temporary signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/danmaku-release.jks"

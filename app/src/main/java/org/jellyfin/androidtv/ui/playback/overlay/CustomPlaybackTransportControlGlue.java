@@ -32,6 +32,7 @@ import org.jellyfin.androidtv.ui.playback.overlay.action.ChapterAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.ClosedCaptionsAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.CustomAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.DanmakuAction;
+import org.jellyfin.androidtv.ui.playback.overlay.action.PlaybackInfoAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.FastForwardAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.GuideAction;
 import org.jellyfin.androidtv.ui.playback.overlay.action.PlayPauseAction;
@@ -65,6 +66,7 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
     private ZoomAction zoomAction;
     private ChapterAction chapterAction;
     private DanmakuAction danmakuAction;
+    private PlaybackInfoAction playbackInfoAction;
 
     // TV actions
     private PreviousLiveTvChannelAction previousLiveTvChannelAction;
@@ -114,6 +116,7 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
         closedCaptionsAction.removePopup();
         playbackSpeedAction.dismissPopup();
         danmakuAction.dismissPopup();
+        playbackInfoAction.dismissPopup();
         selectAudioAction.dismissPopup();
         selectQualityAction.dismissPopup();
         zoomAction.dismissPopup();
@@ -190,6 +193,8 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
     }
 
     private void initActions(Context context) {
+        playbackInfoAction = new PlaybackInfoAction(context, this);
+        playbackInfoAction.setLabels(new String[]{context.getString(R.string.playback_info_title)});
         danmakuAction = new DanmakuAction(context, this);
         danmakuAction.setLabels(new String[]{context.getString(R.string.danmaku_title)});
         playPauseAction = new PlayPauseAction(context);
@@ -293,6 +298,7 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
         }
 
         secondaryActionsAdapter.add(zoomAction);
+        secondaryActionsAdapter.add(playbackInfoAction);
     }
 
     @Override

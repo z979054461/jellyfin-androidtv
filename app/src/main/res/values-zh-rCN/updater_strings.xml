@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_title">应用更新</string>
+    <string name="update_current">当前版本</string>
+    <string name="update_status">更新状态</string>
+    <string name="update_check">检查更新</string>
+    <string name="update_intro">检查 GitHub 上本个人分支的版本（包含预览版），不会自动下载或安装。</string>
+    <string name="update_debug_unsupported">当前预览/debug 包无法直接覆盖为正式包。请先单独安装一次签名正式版 APK，之后即可通过此按钮更新。</string>
+    <string name="update_download">下载并校验更新</string>
+    <string name="update_candidate">版本号 %1$s · %2$s。下载来源：GitHub 的 z979054461/jellyfin-androidtv。</string>
+    <string name="update_install">打开 Android 安装器</string>
+    <string name="update_allow_install">打开安装权限设置</string>
+    <string name="update_install_explanation">Android 可能要求允许此应用安装未知来源应用。是否授权由你决定，安装也需要你在系统安装器中确认。</string>
+    <string name="update_cancel">取消</string>
+    <string name="update_cancelled">已取消，可重新检查或下载。</string>
+    <string name="update_checking">正在检查 GitHub…</string>
+    <string name="update_none">最近 20 个发布版本中没有找到更新的兼容正式版 APK。</string>
+    <string name="update_available">发现可用更新，选择“下载并校验更新”继续。</string>
+    <string name="update_downloading">正在下载并校验 APK，按返回或取消将停止下载。</string>
+    <string name="update_ready">已通过 SHA-256、包名、更高版本号和签名证书校验。请选择安装操作继续。</string>
+    <string name="update_failed">无法安全完成更新，请检查网络或稍后重试。GitHub 缺少校验摘要、APK 无效或签名不同都会阻止安装。</string>
+    <string name="update_settings_unavailable">此设备无法打开安装权限设置，未修改任何权限。</string>
+    <string name="update_verifying">正在重新校验 APK，然后打开 Android 安装器…</string>
+    <string name="update_installer_opened">已打开 Android 安装器，仍需你确认安装；返回此页面不代表安装成功。</string>
+</resources>

@@ -5,6 +5,7 @@ import org.jellyfin.androidtv.BuildConfig
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.ui.preference.dsl.OptionsScreen
 import org.jellyfin.androidtv.ui.preference.dsl.link
+import org.jellyfin.androidtv.ui.preference.screen.AppUpdateScreen
 import org.jellyfin.androidtv.ui.preference.screen.LicensesScreen
 
 fun OptionsScreen.aboutCategory() = category {
@@ -15,6 +16,13 @@ fun OptionsScreen.aboutCategory() = category {
 		title = "Jellyfin app version"
 		content = "jellyfin-androidtv ${BuildConfig.VERSION_NAME} ${BuildConfig.BUILD_TYPE}"
 		icon = R.drawable.ic_jellyfin
+	}
+
+	link {
+		setTitle(R.string.update_check)
+		setContent(R.string.update_intro)
+		icon = R.drawable.ic_jellyfin
+		withFragment<AppUpdateScreen>()
 	}
 
 	link {
