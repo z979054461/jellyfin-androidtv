@@ -125,3 +125,8 @@ installer after an explicit user action. No background or silent updates occur.
 CI checks still run when the four dedicated signing Secrets are unavailable,
 but the workflow then skips publishing. Signing keys must never be committed or
 included in build artifacts. A fixed key is required for all later upgrades.
+
+The fixed release signing certificate SHA-256 is published in
+`config/danmaku-signing.sha256` and checked against every released APK. This is
+only a public fingerprint, not private key material. The keystore is PKCS12;
+CI validates its Java alias before building, and never includes it in artifacts.

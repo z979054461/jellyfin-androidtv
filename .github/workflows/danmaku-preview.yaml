@@ -47,13 +47,16 @@ jobs:
             exit 0
           fi
           umask 077
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/danmaku-release.jks"
-          test -s "$RUNNER_TEMP/danmaku-release.jks"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/danmaku-release.p12"
+          test -s "$RUNNER_TEMP/danmaku-release.p12"
+          keytool -list -keystore "$RUNNER_TEMP/danmaku-release.p12" -storetype PKCS12 \
+            -storepass:env KEYSTORE_PASSWORD -alias "$SIGNING_KEY_ALIAS" > "$RUNNER_TEMP/danmaku-key-info.txt"
+          grep -F 'PrivateKeyEntry' "$RUNNER_TEMP/danmaku-key-info.txt"
           echo 'ready=true' >> "$GITHUB_OUTPUT"
       - name: Build release and run repository checks
         env:
           SIGNING_READY: ${{ steps.signing.outputs.ready }}
-          KEYSTORE_FILE: ${{ runner.temp }}/danmaku-release.jks
+          KEYSTORE_FILE: ${{ runner.temp }}/danmaku-release.p12
           KEYSTORE_PASSWORD: ${{ secrets.DANMAKU_KEYSTORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.DANMAKU_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.DANMAKU_KEY_PASSWORD }}
@@ -125,4 +128,4 @@ jobs:
             build/danmaku-release/*
       - name: Remove temporary signing material
         if: always()
-        run: rm -f "$RUNNER_TEMP/danmaku-release.jks"
+        run: rm -f "$RUNNER_TEMP/danmaku-release.p12"
