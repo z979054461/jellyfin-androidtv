@@ -162,10 +162,48 @@ public class PlaybackController implements PlaybackControllerNotifiable {
     }
 
     public void setPlaybackSpeed(float speed) {
+        if (mFragment != null) mFragment.cancelTemporaryPlaybackSpeed();
         mRequestedPlaybackSpeed = speed;
         if (hasInitializedVideoManager()) {
             mVideoManager.setPlaybackSpeed(speed);
         }
+    }
+
+    /** A hold gesture never changes the saved/requested playback speed. */
+    public boolean canTemporarilyDoubleSpeed() {
+        return isPlaying() && !isLiveTv() && canSeek() && hasInitializedVideoManager()
+                && mVideoManager.isSeekable();
+    }
+
+    public void setTemporaryPlaybackSpeed(float speed) {
+        if (hasInitializedVideoManager()) mVideoManager.setPlaybackSpeed(speed);
+    }
+
+    @Nullable
+    public org.jellyfin.androidtv.ui.playback.network.NetworkTransferMeter.Snapshot getNetworkTransferSnapshot() {
+        return hasInitializedVideoManager() ? mVideoManager.getNetworkTransferSnapshot() : null;
+    }
+
+    public boolean isNetworkPlaybackActive() {
+        if (!hasInitializedVideoManager()) return false;
+        int state = mVideoManager.mExoPlayer.getPlaybackState();
+        return state == androidx.media3.common.Player.STATE_READY
+                || state == androidx.media3.common.Player.STATE_BUFFERING;
+    }
+
+    public boolean isNetworkPlaybackPaused() {
+        return hasInitializedVideoManager() && !mVideoManager.mExoPlayer.getPlayWhenReady();
+    }
+
+    public boolean isNetworkLoading() {
+        return hasInitializedVideoManager() && mVideoManager.mExoPlayer.isLoading();
+    }
+
+    public long getNetworkBufferedDurationMs() {
+        if (!hasInitializedVideoManager()) return 0;
+        long position = mVideoManager.mExoPlayer.getCurrentPosition();
+        long buffered = mVideoManager.mExoPlayer.getBufferedPosition();
+        return position < 0 || buffered < position ? 0 : buffered - position;
     }
 
     public BaseItemDto getCurrentlyPlayingItem() {
@@ -554,6 +592,7 @@ public class PlaybackController implements PlaybackControllerNotifiable {
     }
 
     private void playInternal(final BaseItemDto item, final Long position, final VideoOptions internalOptions) {
+        if (mFragment != null) mFragment.cancelTemporaryPlaybackSpeed();
         if (isLiveTv) {
             updateTvProgramInfo();
             TvManager.setLastLiveTvChannel(item.getId());
@@ -819,6 +858,7 @@ public class PlaybackController implements PlaybackControllerNotifiable {
     }
 
     public void pause() {
+        if (mFragment != null) mFragment.cancelTemporaryPlaybackSpeed();
         Timber.i("pause called at %s", mCurrentPosition);
         // if playback is paused and the seekbar is scrubbed, it will call pause even if already paused
         if (mPlaybackState == PlaybackState.PAUSED) {
@@ -852,6 +892,7 @@ public class PlaybackController implements PlaybackControllerNotifiable {
     }
 
     public void stop() {
+        if (mFragment != null) mFragment.cancelTemporaryPlaybackSpeed();
         refreshCurrentPosition();
         Timber.i("stop called at %s", mCurrentPosition);
         stopReportLoop();
@@ -876,6 +917,7 @@ public class PlaybackController implements PlaybackControllerNotifiable {
     }
 
     public void endPlayback(Boolean closeActivity) {
+        if (mFragment != null) mFragment.cancelTemporaryPlaybackSpeed();
         if (closeActivity && mFragment != null) {
             mFragment.closePlayer();
         }

@@ -21,6 +21,24 @@
         android:layout_width="8dp"
         android:layout_height="0dp" />
 
+    <TextView
+        android:id="@+id/player_network_speed"
+        android:layout_width="184dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:focusable="false"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="end|center_vertical"
+        android:maxLines="1"
+        android:shadowColor="@color/black"
+        android:shadowRadius="4"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:visibility="gone"
+        tools:text="↓ 12.4 MB/s"
+        tools:visibility="visible" />
+
     <org.jellyfin.androidtv.ui.AsyncImageView
         android:id="@+id/clock_user_image"
         android:layout_width="41dp"

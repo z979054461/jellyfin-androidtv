@@ -27,5 +27,10 @@ jobs:
         uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
       - name: Test native danmaku core
         run: tools/danmaku-tests/run.sh
+      - name: Test player transfer rate and temporary speed
+        run: |
+          sh tools/network-tests/run.sh
+          sh tools/network-label-tests/run.sh
+          sh tools/hold-speed-tests/run.sh
       - name: Run test task
         run: ./gradlew test

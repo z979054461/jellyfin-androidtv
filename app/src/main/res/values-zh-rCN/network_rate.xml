@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_rate_value">↓ %1$s</string>
+    <string name="network_rate_with_state">↓ %1$s · %2$s</string>
+    <string name="network_rate_waiting">等待数据</string>
+    <string name="network_rate_buffered">缓冲播放</string>
+    <string name="network_rate_paused">已暂停</string>
+    <string name="network_rate_idle">空闲</string>
+    <string name="network_rate_local">本地播放</string>
+    <string name="network_rate_local_paused">本地 · 已暂停</string>
+    <string name="network_rate_description">播放器网络加载：%1$s。统计近期实际接收字节，不是视频码率或线路带宽。</string>
+</resources>

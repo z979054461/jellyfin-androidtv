@@ -130,3 +130,11 @@ The fixed release signing certificate SHA-256 is published in
 `config/danmaku-signing.sha256` and checked against every released APK. This is
 only a public fingerprint, not private key material. The keystore is PKCS12;
 CI validates its Java alias before building, and never includes it in artifacts.
+
+## Signed release 4
+
+See [release notes](releases/danmaku-release-4.md) and the README for the complete
+downstream feature inventory. The player header now exposes actual network
+payload throughput, and seekable on-demand playback supports hold-to-2x with
+restoration, lifecycle cancellation and a 30-second lost-release safeguard.
+Release package identity and signing certificate remain unchanged from release 3.

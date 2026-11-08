@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_rate_value">↓ %1$s</string>
+    <string name="network_rate_with_state">↓ %1$s · %2$s</string>
+    <string name="network_rate_waiting">Waiting</string>
+    <string name="network_rate_buffered">Buffered</string>
+    <string name="network_rate_paused">Paused</string>
+    <string name="network_rate_idle">Idle</string>
+    <string name="network_rate_local">Local playback</string>
+    <string name="network_rate_local_paused">Local · Paused</string>
+    <string name="network_rate_description">Player network loading: %1$s. Recent received bytes, not media bitrate or connection capacity.</string>
+</resources>

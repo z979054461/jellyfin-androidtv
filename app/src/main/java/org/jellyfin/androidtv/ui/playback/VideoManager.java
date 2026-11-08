@@ -9,6 +9,7 @@ import android.media.audiofx.DynamicsProcessing.Limiter;
 import android.media.audiofx.Equalizer;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -44,6 +45,8 @@ import androidx.media3.ui.CaptionStyleCompat;
 import androidx.media3.ui.PlayerView;
 
 import org.jellyfin.androidtv.R;
+import org.jellyfin.androidtv.ui.playback.network.NetworkTransferMeter;
+import org.jellyfin.androidtv.ui.playback.network.PlayerTransferListener;
 import org.jellyfin.androidtv.data.compat.StreamInfo;
 import org.jellyfin.androidtv.preference.UserPreferences;
 import org.jellyfin.androidtv.preference.constant.ZoomMode;
@@ -76,6 +79,7 @@ public class VideoManager {
     private long mMetaDuration = -1;
     private long lastExoPlayerPosition = -1;
     private boolean nightModeEnabled;
+    private volatile NetworkTransferMeter networkTransferMeter = new NetworkTransferMeter(SystemClock::elapsedRealtime);
 
     public boolean isContracted = false;
 
@@ -83,6 +87,7 @@ public class VideoManager {
     private final HttpDataSource.Factory exoPlayerHttpDataSourceFactory = KoinJavaComponent.get(HttpDataSource.Factory.class);
 
     public VideoManager(@NonNull Activity activity, @NonNull View view, @NonNull PlaybackOverlayFragmentHelper helper) {
+        networkTransferMeter.close();
         mActivity = activity;
         _helper = helper;
         nightModeEnabled = userPreferences.get(UserPreferences.Companion.getAudioNightMode());
@@ -214,12 +219,8 @@ public class VideoManager {
         );
         exoPlayerBuilder.setTrackSelector(trackSelector);
 
-        DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory().setTsExtractorTimestampSearchBytes(TsExtractor.DEFAULT_TIMESTAMP_SEARCH_BYTES * 3);
-        extractorsFactory.setConstantBitrateSeekingEnabled(true);
-        extractorsFactory.setConstantBitrateSeekingAlwaysEnabled(true);
-        DefaultDataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(context, exoPlayerHttpDataSourceFactory);
         exoPlayerBuilder.setRenderersFactory(defaultRendererFactory);
-        exoPlayerBuilder.setMediaSourceFactory(new DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory));
+        exoPlayerBuilder.setMediaSourceFactory(createMediaSourceFactory(context, networkTransferMeter));
 
         exoPlayerBuilder.setAudioAttributes(new AudioAttributes.Builder()
                 .setUsage(C.USAGE_MEDIA)
@@ -227,6 +228,22 @@ public class VideoManager {
                 .build(), true);
 
         return exoPlayerBuilder;
+    }
+
+    private DefaultMediaSourceFactory createMediaSourceFactory(Context context, NetworkTransferMeter meter) {
+        DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory()
+                .setTsExtractorTimestampSearchBytes(TsExtractor.DEFAULT_TIMESTAMP_SEARCH_BYTES * 3);
+        extractorsFactory.setConstantBitrateSeekingEnabled(true);
+        extractorsFactory.setConstantBitrateSeekingAlwaysEnabled(true);
+        // Never set a listener on the shared DI HTTP factory. Each media owns its listener,
+        // including sources created after replacement by an old asynchronous loader.
+        DefaultDataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(context, exoPlayerHttpDataSourceFactory)
+                .setTransferListener(new PlayerTransferListener(meter));
+        return new DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory);
+    }
+
+    public NetworkTransferMeter.Snapshot getNetworkTransferSnapshot() {
+        return networkTransferMeter.snapshot();
     }
 
     public boolean isInitialized() {
@@ -306,6 +323,7 @@ public class VideoManager {
     }
 
     public void stopPlayback() {
+        networkTransferMeter.close();
         if (mExoPlayer != null) {
             mExoPlayer.stop();
 
@@ -349,7 +367,7 @@ public class VideoManager {
             Timber.w("Video path is null cannot continue");
             return;
         }
-        Timber.i("Video path set to: %s", path);
+        Timber.i("Setting video media source");
 
         try {
             // Add external subtitles
@@ -366,7 +384,7 @@ public class VideoManager {
                             .setLabel(mediaStream.getDisplayTitle())
                             .setSelectionFlags(getSubtitleSelectionFlags(mediaStream))
                             .build();
-                    Timber.i("Adding subtitle track %s of type %s", subtitleConfiguration.uri, subtitleConfiguration.mimeType);
+                    Timber.i("Adding external subtitle track of type %s", subtitleConfiguration.mimeType);
                     subtitleConfigurations.add(subtitleConfiguration);
                 }
             }
@@ -376,9 +394,18 @@ public class VideoManager {
                     .setSubtitleConfigurations(subtitleConfigurations)
                     .build();
 
-            mExoPlayer.setMediaItem(mediaItem);
+            networkTransferMeter.close();
+            String scheme = Uri.parse(path).getScheme();
+            boolean localSource = scheme == null || "file".equalsIgnoreCase(scheme)
+                    || "content".equalsIgnoreCase(scheme) || "asset".equalsIgnoreCase(scheme)
+                    || "rawresource".equalsIgnoreCase(scheme) || "android.resource".equalsIgnoreCase(scheme)
+                    || "data".equalsIgnoreCase(scheme);
+            NetworkTransferMeter nextMeter = new NetworkTransferMeter(SystemClock::elapsedRealtime, localSource);
+            networkTransferMeter = nextMeter;
+            mExoPlayer.setMediaSource(createMediaSourceFactory(mActivity, nextMeter).createMediaSource(mediaItem));
             mExoPlayer.prepare();
         } catch (IllegalStateException e) {
+            networkTransferMeter.close();
             Timber.e(e, "Unable to set video path.  Probably backing out.");
         }
     }
@@ -564,6 +591,7 @@ public class VideoManager {
     }
 
     private void releasePlayer() {
+        networkTransferMeter.close();
         _helper.setScreensaverLock(false);
         if (mExoPlayer != null) {
             mExoPlayerView.setPlayer(null);

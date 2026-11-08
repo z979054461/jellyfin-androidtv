@@ -33,6 +33,9 @@ jobs:
         run: |
           tools/danmaku-tests/run.sh
           bash tools/update-tests/run.sh
+          sh tools/network-tests/run.sh
+          sh tools/network-label-tests/run.sh
+          sh tools/hold-speed-tests/run.sh
       - name: Prepare fixed release signing
         id: signing
         env:
@@ -78,8 +81,8 @@ jobs:
           assert metadata['applicationId'] == 'io.github.z979054461.jellyfin.danmaku'
           assert len(metadata['elements']) == 1
           element = metadata['elements'][0]
-          assert element['versionCode'] == 191003
-          assert element['versionName'] == '0.19.10-danmaku.3'
+          assert element['versionCode'] == 191004
+          assert element['versionName'] == '0.19.10-danmaku.4'
           path = root / element['outputFile']
           assert path.is_file() and 0 < path.stat().st_size < 200 * 1024 * 1024
           print(path)
@@ -91,21 +94,21 @@ jobs:
           ACTUAL=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/danmaku-signature.txt")
           test "$EXPECTED" = "$ACTUAL"
           "$TOOLS/aapt" dump badging "$APK" > "$RUNNER_TEMP/danmaku-badging.txt"
-          grep -F "package: name='io.github.z979054461.jellyfin.danmaku' versionCode='191003' versionName='0.19.10-danmaku.3'" "$RUNNER_TEMP/danmaku-badging.txt"
+          grep -F "package: name='io.github.z979054461.jellyfin.danmaku' versionCode='191004' versionName='0.19.10-danmaku.4'" "$RUNNER_TEMP/danmaku-badging.txt"
           "$TOOLS/aapt" dump xmltree "$APK" AndroidManifest.xml > "$RUNNER_TEMP/danmaku-manifest.txt"
           if grep -Eq 'android:debuggable.*0xffffffff' "$RUNNER_TEMP/danmaku-manifest.txt"; then
             echo 'Refusing to publish a debuggable APK.' >&2
             exit 1
           fi
           mkdir -p build/danmaku-release
-          cp "$APK" build/danmaku-release/jellyfin-danmaku-191003.apk
+          cp "$APK" build/danmaku-release/jellyfin-danmaku-191004.apk
           cd build/danmaku-release
           sha256sum *.apk > SHA256SUMS.txt
       - name: Preserve signed and tested artifacts
         if: steps.signing.outputs.ready == 'true'
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: danmaku-release-3
+          name: danmaku-release-4
           path: build/danmaku-release/
           if-no-files-found: error
           retention-days: 30
@@ -114,18 +117,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if gh release view v0.19.10-danmaku.3 >/dev/null 2>&1; then
-            echo 'Release 3 already exists; preserving its tag and assets.'
+          if gh release view v0.19.10-danmaku.4 >/dev/null 2>&1; then
+            echo 'Release 4 already exists; preserving its tag and assets.'
             exit 0
           fi
-          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v0.19.10-danmaku.3" > "$RUNNER_TEMP/danmaku-tag.json" 2>/dev/null; then
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v0.19.10-danmaku.4" > "$RUNNER_TEMP/danmaku-tag.json" 2>/dev/null; then
             test "$(jq -r '.object.type' "$RUNNER_TEMP/danmaku-tag.json")" = 'commit'
             test "$(jq -r '.object.sha' "$RUNNER_TEMP/danmaku-tag.json")" = "$GITHUB_SHA"
           fi
-          gh release create v0.19.10-danmaku.3 \
+          gh release create v0.19.10-danmaku.4 \
             --target "$GITHUB_SHA" --prerelease \
-            --title 'Jellyfin TV 定制版 3（正式签名）' \
-            --notes-file docs/releases/danmaku-release-3.md \
+            --title 'Jellyfin TV 定制版 4（正式签名）' \
+            --notes-file docs/releases/danmaku-release-4.md \
             build/danmaku-release/*
       - name: Remove temporary signing material
         if: always()

@@ -37,6 +37,15 @@ class ClockUserView @JvmOverloads constructor(
 
 	val homeButton get() = binding.home
 
+	/** Player-only text; ordinary screens using this shared toolbar remain unchanged. */
+	fun setPlaybackNetworkStatus(text: CharSequence?) {
+		binding.playerNetworkSpeed.text = text
+		binding.playerNetworkSpeed.contentDescription = text?.let {
+			context.getString(R.string.network_rate_description, it)
+		}
+		binding.playerNetworkSpeed.isVisible = isVideoPlayer && text != null
+	}
+
 	init {
 		updateClockVisibility()
 
@@ -65,5 +74,6 @@ class ClockUserView @JvmOverloads constructor(
 		}
 
 		binding.home.isVisible = !isVideoPlayer
+		binding.playerNetworkSpeed.isVisible = isVideoPlayer && binding.playerNetworkSpeed.text.isNotEmpty()
 	}
 }

@@ -126,4 +126,19 @@
         android:id="@+id/skip_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    <TextView
+        android:id="@+id/temporary_speed_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="24dp"
+        android:padding="12dp"
+        android:background="#CC202020"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:text="@string/temporary_double_speed"
+        android:focusable="false"
+        android:clickable="false"
+        android:accessibilityLiveRegion="polite"
+        android:visibility="gone" />
 </FrameLayout>

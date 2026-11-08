@@ -117,6 +117,79 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
     private Animation showPopup;
     private Animation hidePopup;
     private final Handler mHandler = new Handler();
+    private PlaybackController heldSpeedController;
+    private BaseItemDto heldSpeedItem;
+    private long heldSpeedDownTime = -1;
+    private final HoldToDoubleSpeed holdToDoubleSpeed = new HoldToDoubleSpeed(new HoldToDoubleSpeed.Target() {
+        @Override public boolean isEligible() {
+            return binding != null && binding.getRoot().hasWindowFocus()
+                    && heldSpeedController != null
+                    && heldSpeedController == playbackControllerContainer.getValue().getPlaybackController()
+                    && heldSpeedController.getCurrentlyPlayingItem() == heldSpeedItem
+                    && heldSpeedController.canTemporarilyDoubleSpeed();
+        }
+        @Override public float getSpeed() { return heldSpeedController.getPlaybackSpeed(); }
+        @Override public void setTemporarySpeed(float speed) {
+            if (heldSpeedController != null) heldSpeedController.setTemporaryPlaybackSpeed(speed);
+        }
+        @Override public void showIndicator(boolean visible) {
+            if (binding != null) binding.temporarySpeedIndicator.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+        @Override public void shortPress(int keyCode) {
+            if (keyCode == KeyEvent.KEYCODE_MEDIA_PLAY) heldSpeedController.play(0);
+            else heldSpeedController.playPause();
+        }
+    }, android.view.ViewConfiguration.getLongPressTimeout());
+    private final Runnable heldSpeedTick = new Runnable() {
+        @Override public void run() {
+            holdToDoubleSpeed.tick(android.os.SystemClock.uptimeMillis());
+            if (holdToDoubleSpeed.isTracking()) mHandler.postDelayed(this, 50);
+        }
+    };
+    private final android.view.ViewTreeObserver.OnWindowFocusChangeListener heldSpeedFocusListener = hasFocus -> {
+        if (!hasFocus) cancelTemporaryPlaybackSpeed();
+    };
+
+    /** Called before pause, stop, or changing the player/item, as well as UI teardown. */
+    public void cancelTemporaryPlaybackSpeed() {
+        holdToDoubleSpeed.cancel();
+        mHandler.removeCallbacks(heldSpeedTick);
+    }
+
+    private boolean handleTemporarySpeedKey(int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            boolean consumed = holdToDoubleSpeed.up(keyCode, event.getDownTime(), event.isCanceled()
+                    || (event.getFlags() & KeyEvent.FLAG_CANCELED_LONG_PRESS) != 0);
+            if (consumed && !holdToDoubleSpeed.isTracking()) mHandler.removeCallbacks(heldSpeedTick);
+            return consumed;
+        }
+        if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+        if (holdToDoubleSpeed.hasFinished(keyCode, event.getDownTime())) return true;
+        boolean dedicated = keyCode == KeyEvent.KEYCODE_MEDIA_PLAY || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
+        boolean center = keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER;
+        boolean eligibleKey = !mGuideVisible && !mPopupPanelVisible && binding != null
+                && (dedicated || (center && !mIsVisible && !binding.skipOverlay.getVisible()
+                && leanbackOverlayFragment != null && !leanbackOverlayFragment.isControlsOverlayVisible()));
+        if (!eligibleKey) {
+            cancelTemporaryPlaybackSpeed();
+            return holdToDoubleSpeed.owns(keyCode, event.getDownTime());
+        }
+        if (event.getDownTime() != heldSpeedDownTime) {
+            cancelTemporaryPlaybackSpeed();
+            heldSpeedController = playbackControllerContainer.getValue().getPlaybackController();
+            heldSpeedItem = heldSpeedController == null ? null : heldSpeedController.getCurrentlyPlayingItem();
+            heldSpeedDownTime = event.getDownTime();
+        }
+        boolean consumed = holdToDoubleSpeed.down(keyCode, event.getDownTime(),
+                android.os.SystemClock.uptimeMillis(), event.getRepeatCount() != 0);
+        if (consumed) {
+            mHandler.removeCallbacks(heldSpeedTick);
+            mHandler.postDelayed(heldSpeedTick, 50);
+            if (leanbackOverlayFragment != null) leanbackOverlayFragment.setShouldShowOverlay(false);
+        }
+        return consumed;
+    }
+
     private Runnable mHideTask;
 
     private AudioManager mAudioManager;
@@ -132,6 +205,7 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
     private final Lazy<MediaManager> mediaManager = inject(MediaManager.class);
     private final Lazy<VideoQueueManager> videoQueueManager = inject(VideoQueueManager.class);
     private org.jellyfin.androidtv.ui.playback.danmaku.DanmakuSession danmakuSession;
+    private org.jellyfin.androidtv.ui.playback.network.NetworkSpeedHud networkSpeedHud;
 
     private final Lazy<PlaybackControllerContainer> playbackControllerContainer = inject(PlaybackControllerContainer.class);
     private final Lazy<CustomMessageRepository> customMessageRepository = inject(CustomMessageRepository.class);
@@ -214,6 +288,7 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        view.getViewTreeObserver().addOnWindowFocusChangeListener(heldSpeedFocusListener);
 
         if (mItemsToPlay == null || mItemsToPlay.isEmpty()) {
             Utils.showToast(requireContext(), getString(R.string.msg_no_playable_items));
@@ -225,6 +300,7 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
 
         if (playbackController != null) {
             playbackController.init(new VideoManager(requireActivity(), view, helper), this);
+            networkSpeedHud = new org.jellyfin.androidtv.ui.playback.network.NetworkSpeedHud(binding.textClock, playbackController);
             danmakuSession = new org.jellyfin.androidtv.ui.playback.danmaku.DanmakuSession(
                     binding.danmakuView, playbackController,
                     org.koin.java.KoinJavaComponent.get(org.jellyfin.sdk.api.client.ApiClient.class),
@@ -239,6 +315,14 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
 
     @Override
     public void onDestroyView() {
+        if (networkSpeedHud != null) {
+            networkSpeedHud.close();
+            networkSpeedHud = null;
+        }
+        cancelTemporaryPlaybackSpeed();
+        if (binding != null && binding.getRoot().getViewTreeObserver().isAlive()) {
+            binding.getRoot().getViewTreeObserver().removeOnWindowFocusChangeListener(heldSpeedFocusListener);
+        }
         if (danmakuSession != null) {
             danmakuSession.close();
             danmakuSession = null;
@@ -422,6 +506,7 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
 
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (handleTemporarySpeedKey(keyCode, event)) return true;
         if (event.isLongPress()) {
             if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER) {
                 if (mSelectedProgramView instanceof ProgramGridCell)
@@ -490,6 +575,7 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
     private View.OnKeyListener keyListener = new View.OnKeyListener() {
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
+            if (handleTemporarySpeedKey(keyCode, event)) return true;
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 if (!mGuideVisible)
                     leanbackOverlayFragment.setShouldShowOverlay(true);
@@ -684,6 +770,8 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
             return;
         }
 
+        if (networkSpeedHud != null) networkSpeedHud.setVisible(mIsVisible);
+
         // Hide system bars
         WindowCompat.setDecorFitsSystemWindows(requireActivity().getWindow(), false);
         WindowInsetsControllerCompat insetsController = WindowCompat.getInsetsController(requireActivity().getWindow(), requireActivity().getWindow().getDecorView());
@@ -701,6 +789,8 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
 
     @Override
     public void onPause() {
+        if (networkSpeedHud != null) networkSpeedHud.setVisible(false);
+        cancelTemporaryPlaybackSpeed();
         super.onPause();
         if (mItemsToPlay == null || mItemsToPlay.isEmpty()) return;
 
@@ -712,6 +802,7 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
 
     @Override
     public void onStop() {
+        cancelTemporaryPlaybackSpeed();
         super.onStop();
         Timber.i("Stopping!");
 
@@ -730,18 +821,20 @@ public class CustomPlaybackOverlayFragment extends Fragment implements LiveTvGui
 
     public void show() {
         // Already showing!
-        if (mIsVisible) return;
+        if (binding == null || mIsVisible) return;
 
         binding.topPanel.startAnimation(slideDown);
         mIsVisible = true;
+        if (networkSpeedHud != null) networkSpeedHud.setVisible(isResumed());
         binding.skipOverlay.setSkipUiEnabled(!mIsVisible && !mGuideVisible && !mPopupPanelVisible);
     }
 
     public void hide() {
         // Can't hide what's already hidden
-        if (!mIsVisible) return;
+        if (binding == null || !mIsVisible) return;
 
         mIsVisible = false;
+        if (networkSpeedHud != null) networkSpeedHud.setVisible(false);
         binding.topPanel.startAnimation(fadeOut);
         binding.skipOverlay.setSkipUiEnabled(!mIsVisible && !mGuideVisible && !mPopupPanelVisible);
     }
