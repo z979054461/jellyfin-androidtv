@@ -245,7 +245,7 @@ class AppUpdateScreen : OptionsFragment() {
 				} == true
 			if (!stillValid()) return@post
 			if (list is BaseGridView) {
-				list.setSelectedPosition(position, object : ViewHolderTask() {
+				list.setSelectedPosition(position, object : ViewHolderTask {
 					override fun run(holder: RecyclerView.ViewHolder) {
 						if (stillValid()) holder.itemView.requestFocus()
 					}
