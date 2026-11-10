@@ -1,6 +1,6 @@
-# Jellyfin TV 个人定制版
+# Jellyfin TV 定制版
 
-基于 [Jellyfin Android TV v0.19.10](https://github.com/jellyfin/jellyfin-androidtv/releases/tag/v0.19.10)，面向 Android TV、Nvidia Shield 和 Fire TV。个人维护，非 Jellyfin 官方发行版。
+基于 [Jellyfin Android TV v0.19.10](https://github.com/jellyfin/jellyfin-androidtv/releases/tag/v0.19.10)，适用于 Android TV。非 Jellyfin 官方发行版。
 
 **当前版本：0.19.10-danmaku.5** · [下载 APK](https://github.com/z979054461/jellyfin-androidtv/releases/tag/v0.19.10-danmaku.5) · [更新记录](docs/releases/danmaku-release-5.md)
 
@@ -12,7 +12,6 @@
 - **长按临时 2×**：长按播放键临时加速，松开恢复原速度；控制栏隐藏时也支持确认键。
 - **应用内更新**：设置 → 关于检查更新，下载校验后打开系统安装器。修复下载完成、取消及返回后的遥控器焦点，支持安装重试。
 - **独立安装与外观**：独立包名、固定签名、新图标和电视横幅，可与官方版并存。
-- **日志与发布检查**：不再直接记录完整媒体/字幕 URL；增加定制功能回归测试和 APK 签名、包名、版本校验。
 
 [完整功能与开发说明](docs/custom-changes.md)
 
