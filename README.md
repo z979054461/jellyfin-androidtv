@@ -2,9 +2,11 @@
 
 基于 [Jellyfin Android TV v0.20.0](https://github.com/jellyfin/jellyfin-androidtv/releases/tag/v0.20.0)，面向 Android TV、Nvidia Shield 和 Fire TV。个人维护，非 Jellyfin 官方发行版。
 
-**此分支为 0.20.0 集成预览，尚未发布。** 最低 Android 6（API 23）。
+**此分支为 0.20.0-danmaku.1（versionCode 200001）发布准备，尚未发布，完整验证待完成。** 最低 Android 6（API 23）；Android 5 请保留旧版本。
 
-最近已发布版本：0.19.10-danmaku.5 · [下载 APK](https://github.com/z979054461/jellyfin-androidtv/releases/tag/v0.19.10-danmaku.5) · [更新记录](docs/releases/danmaku-release-5.md)
+[本次更新说明](docs/releases/danmaku-0.20.0-1.md)。新 APK 仅在完整检查及签名校验通过后发布，是否已发布以 [Releases](https://github.com/z979054461/jellyfin-androidtv/releases) 为准。
+
+上一代版本：0.19.10-danmaku.5 · [下载 APK](https://github.com/z979054461/jellyfin-androidtv/releases/tag/v0.19.10-danmaku.5) · [更新记录](docs/releases/danmaku-release-5.md)
 
 ## 相对官方版的变化
 
