@@ -10,6 +10,7 @@ import android.media.audiofx.Equalizer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -32,6 +33,7 @@ import androidx.media3.common.Tracks;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.datasource.DefaultDataSource;
 import androidx.media3.datasource.HttpDataSource;
+import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.analytics.AnalyticsListener;
@@ -39,6 +41,7 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.util.EventLogger;
 import androidx.media3.extractor.DefaultExtractorsFactory;
+import androidx.media3.extractor.ExtractorsFactory;
 import androidx.media3.extractor.ts.TsExtractor;
 import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.CaptionStyleCompat;
@@ -49,6 +52,7 @@ import org.jellyfin.androidtv.ui.playback.network.NetworkTransferMeter;
 import org.jellyfin.androidtv.ui.playback.network.PlayerTransferListener;
 import org.jellyfin.androidtv.data.compat.StreamInfo;
 import org.jellyfin.androidtv.preference.UserPreferences;
+import org.jellyfin.androidtv.preference.constant.BufferLength;
 import org.jellyfin.androidtv.preference.constant.ZoomMode;
 import org.jellyfin.sdk.api.client.ApiClient;
 import org.jellyfin.sdk.model.api.MediaStream;
@@ -61,6 +65,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import io.github.peerless2012.ass.media.AssHandler;
+import io.github.peerless2012.ass.media.AssHandlerConfig;
+import io.github.peerless2012.ass.media.factory.AssRenderersFactory;
+import io.github.peerless2012.ass.media.kt.AssPlayerKt;
+import io.github.peerless2012.ass.media.parser.AssSubtitleParserFactory;
+import io.github.peerless2012.ass.media.type.AssRenderType;
+import io.github.peerless2012.ass.media.widget.AssSubtitleView;
 import timber.log.Timber;
 
 @OptIn(markerClass = UnstableApi.class)
@@ -68,6 +79,7 @@ public class VideoManager {
     private ZoomMode mZoomMode;
     private Activity mActivity;
     private Equalizer mEqualizer;
+    private final AssHandler assHandler;
     private DynamicsProcessing mDynamicsProcessing;
     private Limiter mLimiter;
     private PlaybackControllerNotifiable mPlaybackControllerNotifiable;
@@ -92,7 +104,10 @@ public class VideoManager {
         _helper = helper;
         nightModeEnabled = userPreferences.get(UserPreferences.Companion.getAudioNightMode());
 
-        mExoPlayer = configureExoplayerBuilder(activity).build();
+        boolean assDirectPlay = userPreferences.get(UserPreferences.Companion.getAssDirectPlay());
+        assHandler = assDirectPlay ? new AssHandler(AssRenderType.OVERLAY_OPEN_GL, new AssHandlerConfig()) : null;
+
+        mExoPlayer = configureExoplayerBuilder(activity, assHandler).build();
 
         if (userPreferences.get(UserPreferences.Companion.getDebuggingEnabled())) {
             mExoPlayer.addAnalyticsListener(new EventLogger());
@@ -120,9 +135,14 @@ public class VideoManager {
                 strokeColor,
                 TypefaceCompat.create(activity, Typeface.DEFAULT, textWeight, false)
         );
-        mExoPlayerView.getSubtitleView().setFractionalTextSize(0.0533f * userPreferences.get(UserPreferences.Companion.getSubtitlesTextSize()));
+        mExoPlayerView.getSubtitleView().setFixedTextSize(TypedValue.COMPLEX_UNIT_DIP, userPreferences.get(UserPreferences.Companion.getSubtitlesTextSize()));
         mExoPlayerView.getSubtitleView().setBottomPaddingFraction(userPreferences.get(UserPreferences.Companion.getSubtitlesOffsetPosition()));
         mExoPlayerView.getSubtitleView().setStyle(subtitleStyle);
+
+        if (assHandler != null) {
+            assHandler.init(mExoPlayer);
+            mExoPlayerView.getSubtitleView().addView(new AssSubtitleView(mActivity, assHandler));
+        }
 
         mExoPlayer.addListener(new Player.Listener() {
             @Override
@@ -202,7 +222,7 @@ public class VideoManager {
      * @param context The associated context
      * @return A configured builder for Exoplayer
      */
-    private ExoPlayer.Builder configureExoplayerBuilder(Context context) {
+    private ExoPlayer.Builder configureExoplayerBuilder(Context context, AssHandler assHandler) {
         ExoPlayer.Builder exoPlayerBuilder = new ExoPlayer.Builder(context);
         DefaultRenderersFactory defaultRendererFactory = new DefaultRenderersFactory(context);
         defaultRendererFactory.setEnableDecoderFallback(true);
@@ -219,8 +239,25 @@ public class VideoManager {
         );
         exoPlayerBuilder.setTrackSelector(trackSelector);
 
-        exoPlayerBuilder.setRenderersFactory(defaultRendererFactory);
         exoPlayerBuilder.setMediaSourceFactory(createMediaSourceFactory(context, networkTransferMeter));
+        exoPlayerBuilder.setRenderersFactory(assHandler != null
+                ? new AssRenderersFactory(assHandler, defaultRendererFactory)
+                : defaultRendererFactory);
+
+        BufferLength bufferLength = userPreferences.get(UserPreferences.Companion.getBufferLength());
+        DefaultLoadControl loadControl;
+        if (bufferLength == BufferLength.LARGE) {
+            loadControl = new DefaultLoadControl.Builder()
+                    .setBufferDurationsMs(50_000, 120_000, 2_500, 5_000)
+                    .build();
+        } else if (bufferLength == BufferLength.EXTRA_LARGE) {
+            loadControl = new DefaultLoadControl.Builder()
+                    .setBufferDurationsMs(80_000, 240_000, 5_000, 10_000)
+                    .build();
+        } else {
+            loadControl = new DefaultLoadControl();
+        }
+        exoPlayerBuilder.setLoadControl(loadControl);
 
         exoPlayerBuilder.setAudioAttributes(new AudioAttributes.Builder()
                 .setUsage(C.USAGE_MEDIA)
@@ -239,6 +276,14 @@ public class VideoManager {
         // including sources created after replacement by an old asynchronous loader.
         DefaultDataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(context, exoPlayerHttpDataSourceFactory)
                 .setTransferListener(new PlayerTransferListener(meter));
+        // Every replacement media source must retain upstream ASS parsing as well as its
+        // own transfer listener. Configuring only the builder loses ASS support on setMediaSource.
+        if (assHandler != null) {
+            AssSubtitleParserFactory subtitleParserFactory = new AssSubtitleParserFactory(assHandler);
+            ExtractorsFactory assExtractorsFactory = AssPlayerKt.withAssMkvSupport(extractorsFactory, subtitleParserFactory, assHandler);
+            return new DefaultMediaSourceFactory(dataSourceFactory, assExtractorsFactory)
+                    .setSubtitleParserFactory(subtitleParserFactory);
+        }
         return new DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory);
     }
 

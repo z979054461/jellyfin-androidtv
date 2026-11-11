@@ -43,9 +43,9 @@ class PlaybackInfoAction(context: Context, glue: CustomPlaybackTransportControlG
 		}
 		val scroll = ScrollView(context).apply { addView(text) }
 		val opened = AlertDialog.Builder(context)
-			.setTitle(R.string.playback_info_title)
+			.setTitle(R.string.custom_playback_info_title)
 			.setView(scroll)
-			.setPositiveButton(R.string.playback_info_close, null)
+			.setPositiveButton(R.string.custom_playback_info_close, null)
 			.create()
 		dialog = opened
 		videoPlayerAdapter.leanbackOverlayFragment.setFading(false)
@@ -94,28 +94,28 @@ class PlaybackInfoAction(context: Context, glue: CustomPlaybackTransportControlG
 		val video = streams.firstOrNull { it.type == MediaStreamType.VIDEO }
 		// SDK stream indices are identifiers, not list positions. Never guess the first audio track.
 		val audio = streams.firstOrNull { it.type == MediaStreamType.AUDIO && it.index == controller.playbackInfoAudioStreamIndex }
-		val unknown = context.getString(R.string.playback_info_unavailable)
+		val unknown = context.getString(R.string.custom_playback_info_unavailable)
 		fun row(label: Int, value: String?) = context.getString(label) + ": " + (value ?: unknown)
 		val method = when (info?.playMethod) {
-			PlayMethod.DIRECT_PLAY -> R.string.playback_info_direct_play
-			PlayMethod.DIRECT_STREAM -> R.string.playback_info_direct_stream
-			PlayMethod.TRANSCODE -> R.string.playback_info_transcode
-			else -> R.string.playback_info_unavailable
+			PlayMethod.DIRECT_PLAY -> R.string.custom_playback_info_direct_play
+			PlayMethod.DIRECT_STREAM -> R.string.custom_playback_info_direct_stream
+			PlayMethod.TRANSCODE -> R.string.custom_playback_info_transcode
+			else -> R.string.custom_playback_info_unavailable
 		}
 		return listOf(
-			row(R.string.playback_info_method, context.getString(method)),
-			row(R.string.playback_info_container, PlaybackInfoFormatter.identifier(info?.container)),
+			row(R.string.custom_playback_info_method, context.getString(method)),
+			row(R.string.custom_playback_info_container, PlaybackInfoFormatter.identifier(info?.container)),
 			"",
-			context.getString(R.string.playback_info_source),
-			row(R.string.playback_info_container, PlaybackInfoFormatter.identifier(source?.container)),
-			row(R.string.playback_info_video, sourceVideo(video)),
-			row(R.string.playback_info_audio, sourceAudio(context, audio)),
+			context.getString(R.string.custom_playback_info_source),
+			row(R.string.custom_playback_info_container, PlaybackInfoFormatter.identifier(source?.container)),
+			row(R.string.custom_playback_info_video, sourceVideo(video)),
+			row(R.string.custom_playback_info_audio, sourceAudio(context, audio)),
 			"",
-			context.getString(R.string.playback_info_player),
-			row(R.string.playback_info_video, playerFormat(context, controller.playbackInfoVideoFormat, true)),
-			row(R.string.playback_info_audio, playerFormat(context, controller.playbackInfoAudioFormat, false)),
+			context.getString(R.string.custom_playback_info_player),
+			row(R.string.custom_playback_info_video, playerFormat(context, controller.playbackInfoVideoFormat, true)),
+			row(R.string.custom_playback_info_audio, playerFormat(context, controller.playbackInfoAudioFormat, false)),
 			"",
-			context.getString(R.string.playback_info_note),
+			context.getString(R.string.custom_playback_info_note),
 		).joinToString("\n")
 	}
 
@@ -145,7 +145,7 @@ class PlaybackInfoAction(context: Context, glue: CustomPlaybackTransportControlG
 	}
 
 	private fun channels(context: Context, count: Int?): String? =
-		count?.takeIf { it > 0 }?.let { context.getString(R.string.playback_info_channels, it) }
+		count?.takeIf { it > 0 }?.let { context.getString(R.string.custom_playback_info_channels, it) }
 
 	private fun join(vararg values: String?): String? = values.filterNotNull().joinToString(" · ").ifEmpty { null }
 }
