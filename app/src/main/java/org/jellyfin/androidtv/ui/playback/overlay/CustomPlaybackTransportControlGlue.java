@@ -194,7 +194,7 @@ public class CustomPlaybackTransportControlGlue extends PlaybackTransportControl
 
     private void initActions(Context context) {
         playbackInfoAction = new PlaybackInfoAction(context, this);
-        playbackInfoAction.setLabels(new String[]{context.getString(R.string.playback_info_title)});
+        playbackInfoAction.setLabels(new String[]{context.getString(R.string.custom_playback_info_title)});
         danmakuAction = new DanmakuAction(context, this);
         danmakuAction.setLabels(new String[]{context.getString(R.string.danmaku_title)});
         playPauseAction = new PlayPauseAction(context);

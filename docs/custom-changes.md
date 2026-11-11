@@ -1,6 +1,6 @@
 # 定制功能与开发说明
 
-本集成分支基于官方 Jellyfin Android TV v0.20.0。本分支版本为 0.20.0-danmaku.1（versionCode 200001），尚未发布，完整构建与检查待完成。最低系统随上游提升为 Android 6（API 23）。
+本集成分支基于官方 Jellyfin Android TV v0.20.0。代码版本为 0.20.0-danmaku.1（versionCode 200001）；构建检查及正式发布状态以本仓库 Actions 和 Releases 为准。最低系统随上游提升为 Android 6（API 23）。
 
 [返回项目首页](../README.md) · [弹幕协议与测试记录](native-danmaku.md)
 

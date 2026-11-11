@@ -44,6 +44,7 @@ jobs:
           echo "RELEASE_BUILD_TOOLS=$ANDROID_HOME/build-tools/37.0.0" >> "$GITHUB_ENV"
       - name: Test parser, timeline and playback metadata formatting
         run: |
+          python3 tools/resource-tests/run.py
           bash tools/danmaku-tests/run.sh
           bash tools/update-tests/run.sh
           sh tools/network-tests/run.sh
