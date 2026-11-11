@@ -459,28 +459,33 @@
     <string name="pref_screensaver">Šetrič obrazovky</string>
     <string name="pref_screensaver_inapp_enabled_description">Zobrazovať šetrič obrazovky vstavaný v Jellyfine, dokým je aplikácia otvorená</string>
     <string name="pref_screensaver_inapp_timeout">Spustiť šetrič obrazovky po</string>
-    <plurals name="tracks">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="tracks" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s stopa</item>
         <item quantity="few">%1$s stopy</item>
         <item quantity="other">%1$s stôp</item>
     </plurals>
-    <plurals name="minutes">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="minutes" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s minúte</item>
         <item quantity="few">%1$s minútach</item>
         <item quantity="other">%1$s minútach</item>
     </plurals>
     <string name="pref_screensaver_inapp_enabled">Použiť vstavaný šetrič obrazovky</string>
-    <plurals name="episodes">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="episodes" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s epizóda</item>
         <item quantity="few">%1$s epizódy</item>
         <item quantity="other">%1$s epizód</item>
     </plurals>
-    <plurals name="seconds">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="seconds" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s sekunde</item>
         <item quantity="few">%1$s sekundách</item>
         <item quantity="other">%1$s sekundách</item>
     </plurals>
-    <plurals name="hours">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="hours" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s hodine</item>
         <item quantity="few">%1$s hodinách</item>
         <item quantity="other">%1$s hodinách</item>
@@ -503,31 +508,36 @@
     <string name="ac3">DD</string>
     <string name="dca">DTS</string>
     <string name="eac3">DD+</string>
-    <plurals name="items">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="items" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s položka</item>
         <item quantity="few">%1$s položky</item>
         <item quantity="other">%1$s položiek</item>
     </plurals>
-    <plurals name="movies">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="movies" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s film</item>
         <item quantity="few">%1$s filmy</item>
         <item quantity="other">%1$s filmov</item>
     </plurals>
-    <plurals name="albums">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="albums" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s album</item>
         <item quantity="few">%1$s albumy</item>
         <item quantity="other">%1$s albumov</item>
     </plurals>
     <string name="dts_x">DTS:X</string>
     <string name="dts_hd">DTS-HD</string>
-    <plurals name="tv_series">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="tv_series" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s seriál</item>
         <item quantity="few">%1$s seriály</item>
         <item quantity="other">%1$s seriálov</item>
     </plurals>
     <string name="clear_image_cache">Vymazať vyrovnávaciu pamäť obrázkov</string>
     <string name="clear_image_cache_content">Použité: %1$s</string>
-    <plurals name="songs">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="songs" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s skladba</item>
         <item quantity="few">%1$s skladby</item>
         <item quantity="other">%1$s skladieb</item>

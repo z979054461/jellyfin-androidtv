@@ -452,29 +452,34 @@
     <string name="color_pink">Růžová</string>
     <string name="pref_screensaver">Spořič obrazovky</string>
     <string name="enable_reactive_homepage">Povolit reaktivní domovskou stránku</string>
-    <plurals name="hours">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="hours" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s hodina</item>
         <item quantity="few">%1$s hodiny</item>
         <item quantity="other">%1$s hodin</item>
     </plurals>
-    <plurals name="episodes">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="episodes" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s epizoda</item>
         <item quantity="few">%1$s epizody</item>
         <item quantity="other">%1$s epizod</item>
     </plurals>
-    <plurals name="minutes">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="minutes" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s minuta</item>
         <item quantity="few">%1$s minuty</item>
         <item quantity="other">%1$s minut</item>
     </plurals>
-    <plurals name="tracks">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="tracks" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s skladba</item>
         <item quantity="few">%1$s skladby</item>
         <item quantity="other">%1$s skladeb</item>
     </plurals>
     <string name="item_deleted">%1$s odstraněno</string>
     <string name="pref_screensaver_inapp_timeout">Spustit spořič obrazovky po</string>
-    <plurals name="seconds">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="seconds" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s sekunda</item>
         <item quantity="few">%1$s sekundy</item>
         <item quantity="other">%1$s sekund</item>
@@ -496,12 +501,14 @@
     <string name="photos">Fotky</string>
     <string name="lbl_hide_watched_checkmark">Pokud zbývají epizody</string>
     <string name="eac3">DD+</string>
-    <plurals name="items">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="items" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s položka</item>
         <item quantity="few">%1$s položek</item>
         <item quantity="other">%1$s položek</item>
     </plurals>
-    <plurals name="tv_series">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="tv_series" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s seriál</item>
         <item quantity="few">%1$s seriály</item>
         <item quantity="other">%1$s seriálů</item>
@@ -514,17 +521,20 @@
     <string name="dts_hd">DTS-HD</string>
     <string name="dca">DTS</string>
     <string name="ac3">DD</string>
-    <plurals name="movies">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="movies" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s film</item>
         <item quantity="few">%1$s filmy</item>
         <item quantity="other">%1$s filmů</item>
     </plurals>
-    <plurals name="songs">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="songs" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s skladba</item>
         <item quantity="few">%1$s skladby</item>
         <item quantity="other">%1$s skladeb</item>
     </plurals>
-    <plurals name="albums">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="albums" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s album</item>
         <item quantity="few">%1$s alba</item>
         <item quantity="other">%1$s alb</item>

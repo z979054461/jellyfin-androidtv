@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="lbl_upcoming">Būsimi</string>
     <string name="lbl_seasons">Sezonai</string>
     <string name="lbl_series">Serialai</string>
@@ -463,7 +463,8 @@
     <string name="pref_subtitles_background_opacity">Subtitrų fono skaidrumas</string>
     <string name="pref_report_device_profile_title">Pranešti serveriui apie atkūrimo galimybes</string>
     <string name="pref_report_device_profile_success">Dokumentas pateiktas kaip %1$s</string>
-    <plurals name="movies">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="movies" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s filmas</item>
         <item quantity="few">%1$s filmai</item>
         <item quantity="other">%1$s filmų</item>
@@ -480,7 +481,8 @@
     <string name="pref_screensaver_inapp_timeout">Įjungti ekrano užsklandą po</string>
     <string name="photo_albums">Nuotraukų albumai</string>
     <string name="dca">DTS</string>
-    <plurals name="minutes">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="minutes" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s minutė</item>
         <item quantity="few">%1$s minutės</item>
         <item quantity="other">%1$s minučių</item>
@@ -506,12 +508,14 @@
         <item quantity="other">%1$s serijų</item>
     </plurals>
     <string name="photos">Nuotraukos</string>
-    <plurals name="songs">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="songs" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s daina</item>
         <item quantity="few">%1$s dainos</item>
         <item quantity="other">%1$s dainų</item>
     </plurals>
-    <plurals name="albums">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="albums" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s albumas</item>
         <item quantity="few">%1$s albumai</item>
         <item quantity="other">%1$s albumų</item>
@@ -531,7 +535,8 @@
     <string name="preference_enable_trickplay">Įjungti Trickplay vaizdo leistuve</string>
     <string name="pref_troubleshooting">Diagnostika</string>
     <string name="pref_report_device_profile_summary">Įkelti diagnostikos dokumentą į Jellyfin serverį su informacija apie atkūrimo galimybes</string>
-    <plurals name="tracks">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="tracks" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s takelis</item>
         <item quantity="few">%1$s takeliai</item>
         <item quantity="other">%1$s takelių</item>
@@ -568,13 +573,15 @@
     <string name="pref_screensaver_ageratingrequired_enabled">Rodomi tik elementai, kuriems nustatytas amžiaus cenzas</string>
     <string name="pref_screensaver_ageratingrequired_disabled">Rodomi visi elementai</string>
     <string name="item_deletion_failed">Nepavyko ištrinti %1$s</string>
-    <plurals name="seconds">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="seconds" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s sekundė</item>
         <item quantity="few">%1$s sekundės</item>
         <item quantity="other">%1$s sekundžių</item>
     </plurals>
     <string name="app_notification_beta">Programėlė atnaujinta į %1$s\nDėkojame, kad dalyvaujate Jellyfin beta versijos programoje.</string>
-    <plurals name="hours">
+    <!-- Android selects quantities as integers; CLDR many is decimal-only for this locale. -->
+    <plurals name="hours" tools:ignore="MissingQuantity">
         <item quantity="one">%1$s valanda</item>
         <item quantity="few">%1$s valandos</item>
         <item quantity="other">%1$s valandų</item>
