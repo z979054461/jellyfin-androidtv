@@ -81,37 +81,7 @@ jobs:
           ./gradlew assembleDebug assembleRelease test detekt lint --no-daemon
       - name: Verify signed release identity
         if: steps.signing.outputs.ready == 'true'
-        run: |
-          set -euo pipefail
-          TOOLS="$RELEASE_BUILD_TOOLS"
-          APK=$(python3 - <<'PYCODE'
-          import json, pathlib
-          root = pathlib.Path('app/build/outputs/apk/release')
-          metadata = json.loads((root / 'output-metadata.json').read_text())
-          assert metadata['applicationId'] == 'io.github.z979054461.jellyfin.danmaku'
-          assert len(metadata['elements']) == 1
-          element = metadata['elements'][0]
-          assert element['versionCode'] == 200001
-          assert element['versionName'] == '0.20.0-danmaku.1'
-          path = root / element['outputFile']
-          assert path.is_file() and 0 < path.stat().st_size < 200 * 1024 * 1024
-          print(path)
-          PYCODE
-          )
-          "$TOOLS/apksigner" verify --verbose --print-certs "$APK" > "$RUNNER_TEMP/danmaku-signature.txt"
-          EXPECTED=$(tr -d '[:space:]' < config/danmaku-signing.sha256)
-          ACTUAL=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/danmaku-signature.txt")
-          test "$EXPECTED" = "$ACTUAL"
-          "$TOOLS/aapt" dump badging "$APK" > "$RUNNER_TEMP/danmaku-badging.txt"
-          grep -F "package: name='io.github.z979054461.jellyfin.danmaku' versionCode='200001' versionName='0.20.0-danmaku.1'" "$RUNNER_TEMP/danmaku-badging.txt"
-          "$TOOLS/aapt" dump xmltree "$APK" AndroidManifest.xml > "$RUNNER_TEMP/danmaku-manifest.txt"
-          if grep -Eq 'android:debuggable.*0xffffffff' "$RUNNER_TEMP/danmaku-manifest.txt"; then
-            echo 'Refusing to publish a debuggable APK.' >&2
-            exit 1
-          fi
-          rm -rf build/danmaku-release
-          mkdir -p build/danmaku-release
-          cp "$APK" build/danmaku-release/jellyfin-danmaku-200001.apk
+        run: python3 tools/signing/verify_release_apk.py --tools "$RELEASE_BUILD_TOOLS"
       - name: Publish verified APK without replacing tags or assets
         if: steps.signing.outputs.ready == 'true'
         env:
