@@ -4,14 +4,16 @@ on:
   push:
     branches:
       - master
-      - release-*
-      - feature/native-danmaku
-      - feature/upstream-*
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
   security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:

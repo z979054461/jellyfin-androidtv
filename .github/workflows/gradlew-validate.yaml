@@ -6,7 +6,9 @@ on:
       - master
   pull_request:
     paths:
-      - '**/gradlе-wrapper.jar'
+      - '**/gradle-wrapper.jar'
+      - 'gradle/wrapper/**'
+      - '.github/workflows/gradlew-validate.yaml'
 
 permissions:
   contents: read
