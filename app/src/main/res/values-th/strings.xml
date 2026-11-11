@@ -256,7 +256,7 @@
     <string name="lbl_next_episode">ตอนถัดไป</string>
     <string name="lbl_album_name">ชื่ออัลบั้ม</string>
     <string name="lbl_song_title">ชื่อเพลง</string>
-    <string name="lbl_tv_channel_status">%1$d จาก \\%2$d ช่อง</string>
+    <string name="lbl_tv_channel_status">%1$d จาก %2$d ช่อง</string>
     <string name="lbl_tv_filter_status">สำหรับ %1$d ชั่วโมงถัดไป</string>
     <string name="lbl_news">ข่าวสาร</string>
     <string name="lbl_new_only">เฉพาะรายการใหม่</string>

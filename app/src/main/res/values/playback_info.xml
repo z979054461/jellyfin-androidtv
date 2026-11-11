@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!-- Custom labels are available in English and Simplified Chinese; other locales intentionally use English fallback. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en" tools:ignore="MissingTranslation">
     <string name="custom_playback_info_title">Playback information</string>
     <string name="custom_playback_info_close">Close</string>
     <string name="custom_playback_info_unavailable">Unavailable</string>
