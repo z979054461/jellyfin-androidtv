@@ -14,8 +14,26 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
+  release-state:
     if: github.repository == 'z979054461/jellyfin-androidtv' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      should_run: ${{ steps.state.outputs.should_run }}
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Check whether this version is already published
+        id: state
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: v0.20.0-danmaku.1
+          RELEASE_APK: jellyfin-danmaku-200001.apk
+        run: bash tools/signing/check_release_state.sh
+  release:
+    needs: release-state
+    if: needs.release-state.outputs.should_run == 'true' && github.repository == 'z979054461/jellyfin-androidtv' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -86,65 +104,7 @@ jobs:
         if: steps.signing.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          # Only an explicit 404 means absent. Authentication/network errors fail closed.
-          api_optional() {
-            if gh api "$1" > "$2" 2> "$RUNNER_TEMP/danmaku-api-error.txt"; then
-              return 0
-            fi
-            if grep -Fq '(HTTP 404)' "$RUNNER_TEMP/danmaku-api-error.txt"; then
-              return 1
-            fi
-            echo 'Cannot verify existing release state; refusing publication.' >&2
-            exit 1
-          }
-          TAG_JSON="$RUNNER_TEMP/danmaku-tag.json"
-          if api_optional "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" "$TAG_JSON"; then
-            # Resolve annotated tags as well as lightweight tags, without moving either.
-            for attempt in 1 2 3 4 5; do
-              TYPE=$(jq -r '.object.type' "$TAG_JSON")
-              SHA=$(jq -r '.object.sha' "$TAG_JSON")
-              if [ "$TYPE" = commit ]; then break; fi
-              test "$TYPE" = tag
-              gh api "repos/$GITHUB_REPOSITORY/git/tags/$SHA" > "$TAG_JSON.next"
-              mv "$TAG_JSON.next" "$TAG_JSON"
-            done
-            test "$(jq -r '.object.type' "$TAG_JSON")" = commit
-            test "$(jq -r '.object.sha' "$TAG_JSON")" = "$GITHUB_SHA"
-          else
-            # Create only this new tag, explicitly at the fully checked revision.
-            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
-              -f ref="refs/tags/$RELEASE_TAG" -f sha="$GITHUB_SHA" > "$TAG_JSON"
-            test "$(jq -r '.object.sha' "$TAG_JSON")" = "$GITHUB_SHA"
-          fi
-          RELEASE_JSON="$RUNNER_TEMP/danmaku-release.json"
-          if ! api_optional "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" "$RELEASE_JSON"; then
-            # Keep a partial upload private. A retry must verify it, never overwrite it.
-            gh release create "$RELEASE_TAG" --verify-tag --draft \
-              --title 'Jellyfin TV 0.20.0 弹幕定制版 1' \
-              --notes-file docs/releases/danmaku-0.20.0-1.md \
-              "build/danmaku-release/$RELEASE_APK"
-            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RELEASE_JSON"
-          fi
-          EXPECTED_DIGEST=$(sha256sum "build/danmaku-release/$RELEASE_APK" | cut -d ' ' -f 1)
-          # Exactly one asset is permitted: no checksum files, keys, configs or logs.
-          jq -e --arg name "$RELEASE_APK" --arg digest "sha256:$EXPECTED_DIGEST" '
-            (.assets | length) == 1 and
-            .assets[0].name == $name and .assets[0].state == "uploaded" and
-            .assets[0].digest == $digest
-          ' "$RELEASE_JSON" > /dev/null
-          ASSET_ID=$(jq -r '.assets[0].id' "$RELEASE_JSON")
-          gh api -H 'Accept: application/octet-stream' \
-            "repos/$GITHUB_REPOSITORY/releases/assets/$ASSET_ID" > "$RUNNER_TEMP/danmaku-uploaded.apk"
-          test "$(sha256sum "$RUNNER_TEMP/danmaku-uploaded.apk" | cut -d ' ' -f 1)" = "$EXPECTED_DIGEST"
-          if [ "$(jq -r '.draft' "$RELEASE_JSON")" = true ]; then
-            gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest
-          else
-            # A matching public release is a no-op; never rewrite its assets or notes.
-            test "$(jq -r '.prerelease' "$RELEASE_JSON")" = false
-          fi
-          echo "Verified $RELEASE_TAG at $GITHUB_SHA; APK SHA-256: $EXPECTED_DIGEST" >> "$GITHUB_STEP_SUMMARY"
+        run: bash tools/signing/publish_release.sh
       - name: Remove temporary signing material
         if: always()
         run: |

@@ -32,6 +32,10 @@ jobs:
         run: python3 tools/ci/test_android_tools.py
       - name: Test release verification policy
         run: python3 tools/signing/test_verify_release_apk.py
+      - name: Test release publication policy
+        run: |
+          python3 tools/signing/test_publish_release.py
+          python3 tools/signing/test_release_state.py
       - name: Verify Android build tools
         run: bash tools/ci/prepare-android-tools.sh
       - name: Assemble debug APKs
