@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="playback_info_title">播放信息</string>
-    <string name="playback_info_close">关闭</string>
-    <string name="playback_info_unavailable">暂无信息</string>
-    <string name="playback_info_method">播放方式</string>
-    <string name="playback_info_direct_play">直接播放</string>
-    <string name="playback_info_direct_stream">直接串流（重新封装）</string>
-    <string name="playback_info_transcode">转码播放</string>
-    <string name="playback_info_container">封装格式</string>
-    <string name="playback_info_source">原始媒体 · 服务器元数据</string>
-    <string name="playback_info_player">播放器当前输入格式</string>
-    <string name="playback_info_video">视频</string>
-    <string name="playback_info_audio">当前音轨</string>
-    <string name="playback_info_channels">%1$d 声道</string>
-    <string name="playback_info_note">播放器格式为当前选中轨道的编码信息，并非解码输出或实测网速。缺失的参数不显示。查看此面板不会暂停播放。</string>
+    <string name="custom_playback_info_title">播放信息</string>
+    <string name="custom_playback_info_close">关闭</string>
+    <string name="custom_playback_info_unavailable">暂无信息</string>
+    <string name="custom_playback_info_method">播放方式</string>
+    <string name="custom_playback_info_direct_play">直接播放</string>
+    <string name="custom_playback_info_direct_stream">直接串流（重新封装）</string>
+    <string name="custom_playback_info_transcode">转码播放</string>
+    <string name="custom_playback_info_container">封装格式</string>
+    <string name="custom_playback_info_source">原始媒体 · 服务器元数据</string>
+    <string name="custom_playback_info_player">播放器当前输入格式</string>
+    <string name="custom_playback_info_video">视频</string>
+    <string name="custom_playback_info_audio">当前音轨</string>
+    <string name="custom_playback_info_channels">%1$d 声道</string>
+    <string name="custom_playback_info_note">播放器格式为当前选中轨道的编码信息，并非解码输出或实测网速。缺失的参数不显示。查看此面板不会暂停播放。</string>
 </resources>

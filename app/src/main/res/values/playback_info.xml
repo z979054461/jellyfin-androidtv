@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="playback_info_title">Playback information</string>
-    <string name="playback_info_close">Close</string>
-    <string name="playback_info_unavailable">Unavailable</string>
-    <string name="playback_info_method">Play method</string>
-    <string name="playback_info_direct_play">Direct play</string>
-    <string name="playback_info_direct_stream">Direct stream (remux)</string>
-    <string name="playback_info_transcode">Transcoding</string>
-    <string name="playback_info_container">Container</string>
-    <string name="playback_info_source">Original media · server metadata</string>
-    <string name="playback_info_player">Current player input format</string>
-    <string name="playback_info_video">Video</string>
-    <string name="playback_info_audio">Selected audio</string>
-    <string name="playback_info_channels">%1$d channels</string>
-    <string name="playback_info_note">Player format describes the selected encoded tracks, not decoder output or measured network speed. Missing values are omitted. Playback continues while this panel is open.</string>
+<!-- Custom labels are available in English and Simplified Chinese; other locales intentionally use English fallback. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en" tools:ignore="MissingTranslation">
+    <string name="custom_playback_info_title">Playback information</string>
+    <string name="custom_playback_info_close">Close</string>
+    <string name="custom_playback_info_unavailable">Unavailable</string>
+    <string name="custom_playback_info_method">Play method</string>
+    <string name="custom_playback_info_direct_play">Direct play</string>
+    <string name="custom_playback_info_direct_stream">Direct stream (remux)</string>
+    <string name="custom_playback_info_transcode">Transcoding</string>
+    <string name="custom_playback_info_container">Container</string>
+    <string name="custom_playback_info_source">Original media · server metadata</string>
+    <string name="custom_playback_info_player">Current player input format</string>
+    <string name="custom_playback_info_video">Video</string>
+    <string name="custom_playback_info_audio">Selected audio</string>
+    <string name="custom_playback_info_channels">%1$d channels</string>
+    <string name="custom_playback_info_note">Player format describes the selected encoded tracks, not decoder output or measured network speed. Missing values are omitted. Playback continues while this panel is open.</string>
 </resources>
